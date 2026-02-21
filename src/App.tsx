@@ -9,6 +9,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import KYC from "./pages/KYC";
 import Dashboard from "./pages/Dashboard";
+import CourseDetail from "./pages/CourseDetail";
 import Lesson from "./pages/Lesson";
 import Certificate from "./pages/Certificate";
 import Admin from "./pages/Admin";
@@ -29,6 +30,7 @@ const App = () => (
             <Route path="/signup" element={<Signup />} />
             <Route path="/kyc" element={<KYC />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/course/:courseId" element={<CourseDetail />} />
             <Route path="/lesson/:id" element={<Lesson />} />
             <Route path="/certificate" element={<Certificate />} />
             <Route path="/admin" element={<Admin />} />

@@ -25,10 +25,30 @@ export async function getUserRole(userId: string): Promise<string | null> {
   return data?.role || null;
 }
 
+export async function getAllCourses() {
+  const { data, error } = await supabase
+    .from("courses")
+    .select("*")
+    .order("created_at");
+  if (error) throw error;
+  return data || [];
+}
+
 export async function getCourse() {
   const { data, error } = await supabase
     .from("courses")
     .select("*")
+    .eq("id", "a1b2c3d4-e5f6-7890-abcd-ef1234567890")
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function getCourseById(courseId: string) {
+  const { data, error } = await supabase
+    .from("courses")
+    .select("*")
+    .eq("id", courseId)
     .single();
   if (error) throw error;
   return data;
@@ -42,6 +62,8 @@ export async function getWeeksWithLessons(courseId: string) {
     .order("week_number");
   if (weeksError) throw weeksError;
 
+  if (!weeks || weeks.length === 0) return [];
+
   const { data: lessons, error: lessonsError } = await supabase
     .from("lessons")
     .select("*")
@@ -51,7 +73,7 @@ export async function getWeeksWithLessons(courseId: string) {
 
   return weeks.map(week => ({
     ...week,
-    lessons: lessons.filter(l => l.week_id === week.id),
+    lessons: (lessons || []).filter(l => l.week_id === week.id),
   }));
 }
 
@@ -64,6 +86,15 @@ export async function getUserEnrollment(userId: string, courseId: string) {
     .maybeSingle();
   if (error) throw error;
   return data;
+}
+
+export async function getUserEnrollments(userId: string) {
+  const { data, error } = await supabase
+    .from("enrollments")
+    .select("*")
+    .eq("user_id", userId);
+  if (error) throw error;
+  return data || [];
 }
 
 export async function getUserProgress(userId: string) {
@@ -96,4 +127,14 @@ export async function getUserCertificate(userId: string, courseId: string) {
     .maybeSingle();
   if (error) throw error;
   return data;
+}
+
+// Course pricing map (NGN)
+export const COURSE_PRICES: Record<string, number> = {
+  "a1b2c3d4-e5f6-7890-abcd-ef1234567890": 49990, // AI Essentials — ₦49,990
+  "b2c3d4e5-f6a7-8901-bcde-f12345678901": 20000, // Digital Essentials — ₦20,000
+};
+
+export function formatNaira(amount: number): string {
+  return `₦${amount.toLocaleString()}`;
 }

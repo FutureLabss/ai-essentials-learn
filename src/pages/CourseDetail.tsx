@@ -1,0 +1,152 @@
+import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { getCourseById, getWeeksWithLessons, getUserEnrollment, getUserProgress, getUserCertificate } from "@/lib/supabase-helpers";
+import AppShell from "@/components/AppShell";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Lock, CheckCircle, Circle, Award, ChevronRight, ArrowLeft } from "lucide-react";
+import { motion } from "framer-motion";
+
+export default function CourseDetail() {
+  const { courseId } = useParams<{ courseId: string }>();
+  const { user, profile, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
+  const [course, setCourse] = useState<any>(null);
+  const [weeks, setWeeks] = useState<any[]>([]);
+  const [enrollment, setEnrollment] = useState<any>(null);
+  const [progress, setProgress] = useState<any[]>([]);
+  const [certificate, setCertificate] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (authLoading) return;
+    if (!user) { navigate("/login"); return; }
+    if (!courseId) { navigate("/dashboard"); return; }
+    loadData();
+  }, [user, courseId, authLoading]);
+
+  const loadData = async () => {
+    if (!user || !courseId) return;
+    try {
+      const [c, w, e, p, cert] = await Promise.all([
+        getCourseById(courseId),
+        getWeeksWithLessons(courseId),
+        getUserEnrollment(user.id, courseId),
+        getUserProgress(user.id),
+        getUserCertificate(user.id, courseId),
+      ]);
+      setCourse(c);
+      setWeeks(w);
+      setEnrollment(e);
+      setProgress(p);
+      setCertificate(cert);
+    } catch (err) {
+      console.error(err);
+      navigate("/dashboard");
+    }
+    setLoading(false);
+  };
+
+  const totalLessons = weeks.reduce((sum, w) => sum + w.lessons.length, 0);
+  const completedLessons = progress.filter(p => p.completed).length;
+  const progressPct = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
+  const isUnlocked = enrollment?.is_unlocked;
+
+  const allLessons = weeks.flatMap(w => w.lessons.map((l: any) => ({ ...l, weekTitle: w.title, weekNumber: w.week_number })));
+  const completedIds = new Set(progress.filter(p => p.completed).map(p => p.lesson_id));
+
+  const getFirstIncompleteLessonIndex = () => {
+    for (let i = 0; i < allLessons.length; i++) {
+      if (!completedIds.has(allLessons[i].id)) return i;
+    }
+    return allLessons.length;
+  };
+  const firstIncompleteIdx = getFirstIncompleteLessonIndex();
+
+  if (authLoading || loading) {
+    return <AppShell><div className="container py-12 text-center text-muted-foreground">Loading…</div></AppShell>;
+  }
+
+  if (!course) return null;
+
+  return (
+    <AppShell>
+      <div className="container max-w-2xl py-6">
+        <Button variant="ghost" size="sm" onClick={() => navigate("/dashboard")} className="mb-4">
+          <ArrowLeft className="h-4 w-4 mr-1" /> All Courses
+        </Button>
+
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
+          <h1 className="font-display text-2xl font-bold mb-1">{course.name}</h1>
+          <p className="text-muted-foreground text-sm">{course.duration_weeks} Weeks · {totalLessons} Lessons</p>
+        </motion.div>
+
+        {certificate && (
+          <div className="rounded-lg bg-accent/10 border border-accent p-4 mb-6 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Award className="h-8 w-8 text-accent" />
+              <div>
+                <p className="font-semibold text-sm">Course Completed!</p>
+                <p className="text-xs text-muted-foreground">Certificate ID: {certificate.certificate_id}</p>
+              </div>
+            </div>
+            <Button size="sm" variant="outline" onClick={() => navigate("/certificate")}>
+              View
+            </Button>
+          </div>
+        )}
+
+        {isUnlocked && (
+          <div className="rounded-lg border bg-card p-4 mb-6">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-sm font-medium">Progress</span>
+              <span className="text-sm text-muted-foreground">{completedLessons}/{totalLessons} lessons</span>
+            </div>
+            <Progress value={progressPct} className="h-2" />
+          </div>
+        )}
+
+        <div className="space-y-4">
+          {weeks.map((week) => (
+            <div key={week.id} className="rounded-lg border bg-card overflow-hidden">
+              <div className="px-4 py-3 bg-secondary/50">
+                <h3 className="font-display font-semibold text-sm">Week {week.week_number}: {week.title}</h3>
+              </div>
+              <div className="divide-y">
+                {week.lessons.map((lesson: any) => {
+                  const globalIdx = allLessons.findIndex((l: any) => l.id === lesson.id);
+                  const isCompleted = completedIds.has(lesson.id);
+                  const isAccessible = isUnlocked && globalIdx <= firstIncompleteIdx;
+
+                  return (
+                    <div
+                      key={lesson.id}
+                      className={`flex items-center gap-3 px-4 py-3 ${isAccessible ? "cursor-pointer hover:bg-muted/50" : "opacity-50"}`}
+                      onClick={() => isAccessible && navigate(`/lesson/${lesson.id}`)}
+                    >
+                      {isCompleted ? (
+                        <CheckCircle className="h-5 w-5 text-success shrink-0" />
+                      ) : isAccessible ? (
+                        <Circle className="h-5 w-5 text-primary shrink-0" />
+                      ) : (
+                        <Lock className="h-4 w-4 text-muted-foreground shrink-0" />
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{lesson.title}</p>
+                        {lesson.learning_objective && (
+                          <p className="text-xs text-muted-foreground truncate">{lesson.learning_objective}</p>
+                        )}
+                      </div>
+                      {isAccessible && <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </AppShell>
+  );
+}

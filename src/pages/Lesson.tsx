@@ -96,7 +96,7 @@ export default function Lesson() {
           {/* Content */}
           <div className="prose prose-sm max-w-none mb-8">
             {lesson.content.split("\n").map((paragraph: string, i: number) => (
-              paragraph.trim() ? <p key={i} className="text-foreground/90 leading-relaxed">{paragraph}</p> : null
+              paragraph.trim() ? <p key={i} className="text-foreground/90 leading-relaxed mb-3">{paragraph}</p> : null
             ))}
           </div>
 
@@ -108,12 +108,24 @@ export default function Lesson() {
             </div>
           )}
 
-          {/* Video link */}
+          {/* Video */}
           {lesson.video_url && (
             <div className="mb-8">
-              <a href={lesson.video_url} target="_blank" rel="noopener noreferrer" className="text-primary underline text-sm">
-                Watch Video Resource →
-              </a>
+              {lesson.video_url.includes("youtube.com") || lesson.video_url.includes("youtu.be") ? (
+                <div className="aspect-video rounded-lg overflow-hidden border">
+                  <iframe
+                    src={lesson.video_url.replace("watch?v=", "embed/")}
+                    title={lesson.title}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    className="w-full h-full"
+                  />
+                </div>
+              ) : (
+                <a href={lesson.video_url} target="_blank" rel="noopener noreferrer" className="text-primary underline text-sm">
+                  Watch Video Resource →
+                </a>
+              )}
             </div>
           )}
 
