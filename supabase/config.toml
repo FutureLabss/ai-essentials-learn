@@ -1,1 +1,4 @@
 project_id = "sbtdubgxwpymeatrpgwm"
+
+[functions.paystack]
+verify_jwt = false
