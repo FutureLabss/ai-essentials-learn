@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { markLessonComplete, getUserProgress, getWeeksWithLessons, getCourse, getUserEnrollment } from "@/lib/supabase-helpers";
+import { markLessonComplete, getUserProgress, getWeeksWithLessons, getCourseById, getUserEnrollment } from "@/lib/supabase-helpers";
+import { allCourses } from "@/data/courses";
 import AppShell from "@/components/AppShell";
 import CourseSidebar from "@/components/CourseSidebar";
 import { Button } from "@/components/ui/button";
@@ -31,15 +32,31 @@ export default function Lesson() {
 
   const loadLesson = async () => {
     if (!user || !id) return;
-    const { data: lessonData } = await supabase.from("lessons").select("*").eq("id", id).single();
+
+    // Try to find in local data first for immediate update
+    const localLesson = allCourses.flatMap(c => c.weeks).flatMap(w => w.lessons).find(l => l.id === id);
+    let lessonData = localLesson;
+
+    if (!lessonData) {
+      const { data } = await supabase.from("lessons").select("*").eq("id", id).single();
+      lessonData = data;
+    }
+
     if (!lessonData) { navigate("/dashboard"); return; }
     setLesson(lessonData);
 
-    const { data: weekData } = await supabase.from("weeks").select("*").eq("id", lessonData.week_id).single();
+    const localWeek = allCourses.flatMap(c => c.weeks).find(w => w.lessons.some(l => l.id === id));
+    let weekData = localWeek;
+
+    if (!weekData) {
+      const { data } = await supabase.from("weeks").select("*").eq("id", (lessonData as any).week_id).single();
+      weekData = data;
+    }
     setWeek(weekData);
 
-    const courseData = await getCourse();
+    const courseData = await getCourseById(localWeek ? allCourses.find(c => c.weeks.some(w => w.id === localWeek.id))?.id || "" : (weekData as any).course_id);
     setCourseData(courseData);
+
     const weeksData = await getWeeksWithLessons(courseData.id);
     setWeeks(weeksData);
     const ordered = weeksData.flatMap(w => w.lessons);
@@ -66,11 +83,10 @@ export default function Lesson() {
     setProgress(updatedProgress);
     const completedIds = new Set(updatedProgress.filter(p => p.completed).map(p => p.lesson_id));
     if (allLessons.every(l => completedIds.has(l.id))) {
-      const courseData = await getCourse();
       const certId = `CERT-${Date.now()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
       await supabase.from("certificates").insert({
         user_id: user.id,
-        course_id: courseData.id,
+        course_id: course.id,
         certificate_id: certId,
       });
       toast.success("🎉 Congratulations! Your certificate is ready!");
