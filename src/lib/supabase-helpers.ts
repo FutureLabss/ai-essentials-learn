@@ -1,5 +1,4 @@
 import { supabase } from "@/integrations/supabase/client";
-import { allCourses } from "@/data/courses";
 
 export async function getCurrentUser() {
   const { data: { user } } = await supabase.auth.getUser();
@@ -27,30 +26,25 @@ export async function getUserRole(userId: string): Promise<string | null> {
 }
 
 export async function getAllCourses() {
-  // Use DB as source, but map descriptions/details from local data for consistency if needed
   const { data, error } = await supabase
     .from("courses")
     .select("*")
     .order("created_at");
-
   if (error) throw error;
-
-  // Enhance DB data with local content if IDs match
-  return (data || []).map(dbCourse => {
-    const local = allCourses.find(c => c.id === dbCourse.id);
-    return local ? { ...dbCourse, ...local } : dbCourse;
-  });
+  return data || [];
 }
 
 export async function getCourse() {
-  // Default to AI Essentials for single-course contexts
-  return allCourses[0];
+  const { data, error } = await supabase
+    .from("courses")
+    .select("*")
+    .eq("id", "a1b2c3d4-e5f6-7890-abcd-ef1234567890")
+    .single();
+  if (error) throw error;
+  return data;
 }
 
 export async function getCourseById(courseId: string) {
-  const local = allCourses.find(c => c.id === courseId);
-  if (local) return local;
-
   const { data, error } = await supabase
     .from("courses")
     .select("*")
@@ -61,9 +55,6 @@ export async function getCourseById(courseId: string) {
 }
 
 export async function getWeeksWithLessons(courseId: string) {
-  const local = allCourses.find(c => c.id === courseId);
-  if (local) return local.weeks;
-
   const { data: weeks, error: weeksError } = await supabase
     .from("weeks")
     .select("*")
