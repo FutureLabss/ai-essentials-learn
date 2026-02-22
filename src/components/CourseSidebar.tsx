@@ -88,7 +88,7 @@ export default function CourseSidebar({ weeks, progress, currentLessonId, isUnlo
                     {week.lessons.map((lesson: any) => {
                       const globalIdx = allLessons.findIndex((l: any) => l.id === lesson.id);
                       const isCompleted = completedIds.has(lesson.id);
-                      const isAccessible = isUnlocked && globalIdx <= firstIncompleteIdx;
+                      const isAccessible = isUnlocked;
                       const isCurrent = lesson.id === currentLessonId;
 
                       return (

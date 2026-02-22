@@ -158,8 +158,8 @@ export default function Lesson() {
                     <CheckCircle className="h-5 w-5" /> Completed
                   </div>
                 )}
-                {isCompleted && nextLesson && (
-                  <Button onClick={() => navigate(`/lesson/${nextLesson.id}`)} className="flex-1">
+                {nextLesson && (
+                  <Button onClick={() => navigate(`/lesson/${nextLesson.id}`)} className="flex-1" variant={isCompleted ? "default" : "outline"}>
                     Next Lesson <ArrowRight className="h-4 w-4 ml-1" />
                   </Button>
                 )}
@@ -172,7 +172,7 @@ export default function Lesson() {
                     ← Previous
                   </Button>
                 ) : <div />}
-                {nextLesson && isCompleted ? (
+                {nextLesson ? (
                   <Button variant="ghost" size="sm" onClick={() => navigate(`/lesson/${nextLesson.id}`)}>
                     Next →
                   </Button>
