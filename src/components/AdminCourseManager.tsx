@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { getWeeksWithLessons } from "@/lib/supabase-helpers";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,6 +10,7 @@ import { Plus, Trash2, BookOpen, GripVertical } from "lucide-react";
 import { toast } from "sonner";
 
 interface LessonDraft {
+  id?: string;
   title: string;
   content: string;
   video_url: string;
@@ -17,6 +19,7 @@ interface LessonDraft {
 }
 
 interface WeekDraft {
+  id?: string;
   title: string;
   description: string;
   lessons: LessonDraft[];
@@ -36,17 +39,76 @@ const emptyWeek = (): WeekDraft => ({
   lessons: [emptyLesson()],
 });
 
-interface Props {
-  onCourseCreated: () => void;
+interface CourseToEdit {
+  id: string;
+  name: string;
+  description: string | null;
+  duration_weeks: number;
 }
 
-export default function AdminCourseManager({ onCourseCreated }: Props) {
-  const [open, setOpen] = useState(false);
+interface Props {
+  onCourseCreated: () => void;
+  editCourse?: CourseToEdit | null;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
+export default function AdminCourseManager({ onCourseCreated, editCourse, open: controlledOpen, onOpenChange }: Props) {
+  const isControlled = controlledOpen !== undefined;
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = isControlled ? controlledOpen : internalOpen;
+  const setOpen = (v: boolean) => {
+    if (isControlled) onOpenChange?.(v);
+    else setInternalOpen(v);
+  };
+
   const [saving, setSaving] = useState(false);
+  const [loadingEdit, setLoadingEdit] = useState(false);
   const [courseName, setCourseName] = useState("");
   const [courseDescription, setCourseDescription] = useState("");
   const [durationWeeks, setDurationWeeks] = useState(6);
   const [weeks, setWeeks] = useState<WeekDraft[]>([emptyWeek()]);
+
+  const isEdit = !!editCourse;
+
+  // Load existing course data when editing
+  useEffect(() => {
+    if (editCourse && open) {
+      setCourseName(editCourse.name);
+      setCourseDescription(editCourse.description || "");
+      setDurationWeeks(editCourse.duration_weeks);
+      loadExistingWeeks(editCourse.id);
+    }
+  }, [editCourse, open]);
+
+  const loadExistingWeeks = async (courseId: string) => {
+    setLoadingEdit(true);
+    try {
+      const weeksData = await getWeeksWithLessons(courseId);
+      if (weeksData.length > 0) {
+        setWeeks(weeksData.map((w: any) => ({
+          id: w.id,
+          title: w.title,
+          description: w.description || "",
+          lessons: w.lessons.map((l: any) => ({
+            id: l.id,
+            title: l.title,
+            content: l.content,
+            video_url: l.video_url || "",
+            learning_objective: l.learning_objective || "",
+            practical_task: l.practical_task || "",
+          })),
+        })));
+      } else {
+        setWeeks([emptyWeek()]);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to load course data");
+    } finally {
+      setLoadingEdit(false);
+    }
+  };
 
   const updateWeek = (wi: number, field: keyof WeekDraft, value: string) => {
     setWeeks(prev => prev.map((w, i) => i === wi ? { ...w, [field]: value } : w));
@@ -76,53 +138,106 @@ export default function AdminCourseManager({ onCourseCreated }: Props) {
 
     setSaving(true);
     try {
-      // 1. Create course
-      const { data: course, error: courseErr } = await supabase
-        .from("courses")
-        .insert({ name: courseName.trim(), description: courseDescription.trim() || null, duration_weeks: durationWeeks })
-        .select()
-        .single();
-      if (courseErr) throw courseErr;
-
-      // 2. Create weeks
-      const weekInserts = weeks.map((w, i) => ({
-        course_id: course.id,
-        week_number: i + 1,
-        title: w.title.trim(),
-        description: w.description.trim() || null,
-      }));
-      const { data: createdWeeks, error: weeksErr } = await supabase
-        .from("weeks")
-        .insert(weekInserts)
-        .select();
-      if (weeksErr) throw weeksErr;
-
-      // 3. Create lessons — map by week_number order
-      const sortedWeeks = [...createdWeeks].sort((a, b) => a.week_number - b.week_number);
-      const lessonInserts = sortedWeeks.flatMap((dbWeek, wi) =>
-        weeks[wi].lessons.map((l, li) => ({
-          week_id: dbWeek.id,
-          lesson_number: li + 1,
-          title: l.title.trim(),
-          content: l.content.trim(),
-          video_url: l.video_url.trim() || null,
-          learning_objective: l.learning_objective.trim() || null,
-          practical_task: l.practical_task.trim() || null,
-        }))
-      );
-      const { error: lessonsErr } = await supabase.from("lessons").insert(lessonInserts);
-      if (lessonsErr) throw lessonsErr;
-
-      toast.success(`Course "${courseName}" created with ${weeks.length} weeks!`);
+      if (isEdit) {
+        await handleUpdate();
+      } else {
+        await handleCreate();
+      }
       resetForm();
       setOpen(false);
       onCourseCreated();
     } catch (err: any) {
       console.error(err);
-      toast.error(err.message || "Failed to create course");
+      toast.error(err.message || `Failed to ${isEdit ? "update" : "create"} course`);
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleCreate = async () => {
+    const { data: course, error: courseErr } = await supabase
+      .from("courses")
+      .insert({ name: courseName.trim(), description: courseDescription.trim() || null, duration_weeks: durationWeeks })
+      .select()
+      .single();
+    if (courseErr) throw courseErr;
+
+    const weekInserts = weeks.map((w, i) => ({
+      course_id: course.id,
+      week_number: i + 1,
+      title: w.title.trim(),
+      description: w.description.trim() || null,
+    }));
+    const { data: createdWeeks, error: weeksErr } = await supabase.from("weeks").insert(weekInserts).select();
+    if (weeksErr) throw weeksErr;
+
+    const sortedWeeks = [...createdWeeks].sort((a, b) => a.week_number - b.week_number);
+    const lessonInserts = sortedWeeks.flatMap((dbWeek, wi) =>
+      weeks[wi].lessons.map((l, li) => ({
+        week_id: dbWeek.id,
+        lesson_number: li + 1,
+        title: l.title.trim(),
+        content: l.content.trim(),
+        video_url: l.video_url.trim() || null,
+        learning_objective: l.learning_objective.trim() || null,
+        practical_task: l.practical_task.trim() || null,
+      }))
+    );
+    const { error: lessonsErr } = await supabase.from("lessons").insert(lessonInserts);
+    if (lessonsErr) throw lessonsErr;
+
+    toast.success(`Course "${courseName}" created!`);
+  };
+
+  const handleUpdate = async () => {
+    const courseId = editCourse!.id;
+
+    // Update course details
+    const { error: courseErr } = await supabase
+      .from("courses")
+      .update({ name: courseName.trim(), description: courseDescription.trim() || null, duration_weeks: durationWeeks })
+      .eq("id", courseId);
+    if (courseErr) throw courseErr;
+
+    // Delete all existing weeks & lessons (cascade via week_id FK), then re-insert
+    // First delete lessons for all weeks of this course
+    const { data: existingWeeks } = await supabase.from("weeks").select("id").eq("course_id", courseId);
+    if (existingWeeks && existingWeeks.length > 0) {
+      const weekIds = existingWeeks.map(w => w.id);
+      const { error: delLessons } = await supabase.from("lessons").delete().in("week_id", weekIds);
+      if (delLessons) throw delLessons;
+    }
+    const { error: delWeeks } = await supabase.from("weeks").delete().eq("course_id", courseId);
+    if (delWeeks) throw delWeeks;
+
+    // Re-insert weeks and lessons
+    const weekInserts = weeks.map((w, i) => ({
+      course_id: courseId,
+      week_number: i + 1,
+      title: w.title.trim(),
+      description: w.description.trim() || null,
+    }));
+    const { data: createdWeeks, error: weeksErr } = await supabase.from("weeks").insert(weekInserts).select();
+    if (weeksErr) throw weeksErr;
+
+    const sortedWeeks = [...createdWeeks].sort((a, b) => a.week_number - b.week_number);
+    const lessonInserts = sortedWeeks.flatMap((dbWeek, wi) =>
+      weeks[wi].lessons.map((l, li) => ({
+        week_id: dbWeek.id,
+        lesson_number: li + 1,
+        title: l.title.trim(),
+        content: l.content.trim(),
+        video_url: l.video_url.trim() || null,
+        learning_objective: l.learning_objective.trim() || null,
+        practical_task: l.practical_task.trim() || null,
+      }))
+    );
+    if (lessonInserts.length > 0) {
+      const { error: lessonsErr } = await supabase.from("lessons").insert(lessonInserts);
+      if (lessonsErr) throw lessonsErr;
+    }
+
+    toast.success(`Course "${courseName}" updated!`);
   };
 
   const resetForm = () => {
@@ -132,20 +247,18 @@ export default function AdminCourseManager({ onCourseCreated }: Props) {
     setWeeks([emptyWeek()]);
   };
 
-  return (
-    <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
-      <DialogTrigger asChild>
-        <Button><Plus className="h-4 w-4 mr-1" /> Create Course</Button>
-      </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="font-display flex items-center gap-2">
-            <BookOpen className="h-5 w-5" /> Create New Course
-          </DialogTitle>
-        </DialogHeader>
+  const dialogContent = (
+    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogHeader>
+        <DialogTitle className="font-display flex items-center gap-2">
+          <BookOpen className="h-5 w-5" /> {isEdit ? "Edit Course" : "Create New Course"}
+        </DialogTitle>
+      </DialogHeader>
 
+      {loadingEdit ? (
+        <div className="py-8 text-center text-muted-foreground">Loading course data…</div>
+      ) : (
         <div className="space-y-4">
-          {/* Course details */}
           <div className="space-y-3">
             <div>
               <label className="text-sm font-medium">Course Name *</label>
@@ -161,7 +274,6 @@ export default function AdminCourseManager({ onCourseCreated }: Props) {
             </div>
           </div>
 
-          {/* Weeks & Lessons */}
           <div>
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-sm font-semibold">Weeks & Lessons</h3>
@@ -191,7 +303,6 @@ export default function AdminCourseManager({ onCourseCreated }: Props) {
                     </div>
                     <Input placeholder="Week description (optional)" value={week.description} onChange={e => updateWeek(wi, "description", e.target.value)} />
 
-                    {/* Lessons */}
                     <div className="space-y-3 pl-4 border-l-2 border-muted">
                       {week.lessons.map((lesson, li) => (
                         <div key={li} className="space-y-2 p-3 rounded-md bg-muted/30">
@@ -221,10 +332,28 @@ export default function AdminCourseManager({ onCourseCreated }: Props) {
           </div>
 
           <Button className="w-full" onClick={handleSave} disabled={saving}>
-            {saving ? "Creating…" : "Create Course"}
+            {saving ? (isEdit ? "Updating…" : "Creating…") : (isEdit ? "Update Course" : "Create Course")}
           </Button>
         </div>
-      </DialogContent>
+      )}
+    </DialogContent>
+  );
+
+  // If controlled (edit mode), render without trigger
+  if (isControlled) {
+    return (
+      <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
+        {dialogContent}
+      </Dialog>
+    );
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
+      <DialogTrigger asChild>
+        <Button><Plus className="h-4 w-4 mr-1" /> Create Course</Button>
+      </DialogTrigger>
+      {dialogContent}
     </Dialog>
   );
 }
