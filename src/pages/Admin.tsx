@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Search, Eye, UserPlus, Unlock, RefreshCw, CheckCircle, Circle } from "lucide-react";
+import AdminCourseManager from "@/components/AdminCourseManager";
 import { toast } from "sonner";
 
 export default function Admin() {
@@ -136,8 +137,11 @@ export default function Admin() {
   return (
     <AppShell>
       <div className="container max-w-3xl py-6">
-        <h1 className="font-display text-2xl font-bold mb-1">Admin Dashboard</h1>
-        <p className="text-muted-foreground text-sm mb-6">{users.length} learners</p>
+        <div className="flex items-center justify-between mb-1">
+          <h1 className="font-display text-2xl font-bold">Admin Dashboard</h1>
+          <AdminCourseManager onCourseCreated={initAdmin} />
+        </div>
+        <p className="text-muted-foreground text-sm mb-6">{users.length} learners · {courses.length} courses</p>
 
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
           <div className="flex-1 relative">
