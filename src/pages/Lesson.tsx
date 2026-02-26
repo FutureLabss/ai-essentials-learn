@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { markLessonComplete, getUserProgress, getWeeksWithLessons, getCourse, getUserEnrollment } from "@/lib/supabase-helpers";
 import AppShell from "@/components/AppShell";
 import CourseSidebar from "@/components/CourseSidebar";
+import AiTutorChat from "@/components/AiTutorChat";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
@@ -182,6 +183,7 @@ export default function Lesson() {
           </div>
         </div>
       </div>
+      {course && <AiTutorChat courseId={course.id} />}
     </AppShell>
   );
 }
