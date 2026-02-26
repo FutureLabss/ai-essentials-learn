@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { getCourseById, getWeeksWithLessons, getUserEnrollment, getUserProgress, getUserCertificate } from "@/lib/supabase-helpers";
 import AppShell from "@/components/AppShell";
+import AiTutorChat from "@/components/AiTutorChat";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Lock, CheckCircle, Circle, Award, ChevronRight, ArrowLeft } from "lucide-react";
@@ -147,6 +148,7 @@ export default function CourseDetail() {
           ))}
         </div>
       </div>
+      {course && <AiTutorChat courseId={course.id} />}
     </AppShell>
   );
 }
