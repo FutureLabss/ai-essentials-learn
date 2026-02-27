@@ -42,7 +42,32 @@ Deno.serve(async (req) => {
 
   try {
     if (action === "initialize" && req.method === "POST") {
-      const { courseId, amount, email, callbackUrl } = await req.json();
+      const { courseId, amount, email, callbackUrl, discountCode } = await req.json();
+
+      // Apply discount code MANNY — 100% discount (free access)
+      if (discountCode && discountCode.toUpperCase() === "MANNY") {
+        // Create enrollment and mark as paid immediately
+        const serviceClient = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+        await serviceClient.from("enrollments").upsert(
+          { user_id: userId, course_id: courseId, is_paid: true, is_unlocked: true },
+          { onConflict: "user_id,course_id" }
+        );
+
+        const ref = `DISC-MANNY-${Date.now()}`;
+        await supabase.from("payments").insert({
+          user_id: userId,
+          course_id: courseId,
+          amount: 0,
+          currency: "NGN",
+          status: "completed",
+          payment_reference: ref,
+          paid_at: new Date().toISOString(),
+        });
+
+        return new Response(JSON.stringify({ success: true, discountApplied: true }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
 
       // Create enrollment if not exists
       await supabase.from("enrollments").upsert(
