@@ -4,7 +4,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { getAllCourses, getUserEnrollments, getUserProgress, getUserCertificate, COURSE_PRICES, formatNaira } from "@/lib/supabase-helpers";
 import AppShell from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Lock, Award, ArrowRight, Clock } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { BookOpen, Lock, Award, ArrowRight, Clock, Tag } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,6 +19,7 @@ export default function Dashboard() {
   const [certificates, setCertificates] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [payingCourse, setPayingCourse] = useState<string | null>(null);
+  const [discountCodes, setDiscountCodes] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (authLoading) return;
@@ -56,8 +58,8 @@ export default function Dashboard() {
     try {
       const amount = COURSE_PRICES[courseId] || 20000;
       const callbackUrl = `${window.location.origin}/dashboard?verify=${courseId}`;
+      const discountCode = discountCodes[courseId]?.trim() || undefined;
 
-      // supabase.functions.invoke passes query params via URL — we need raw fetch
       const session = await supabase.auth.getSession();
       const token = session.data.session?.access_token;
 
@@ -71,12 +73,15 @@ export default function Dashboard() {
             "Content-Type": "application/json",
             apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
           },
-          body: JSON.stringify({ courseId, amount, email: profile.email, callbackUrl }),
+          body: JSON.stringify({ courseId, amount, email: profile.email, callbackUrl, discountCode }),
         }
       );
 
       const result = await res.json();
-      if (result.authorization_url) {
+      if (result.discountApplied) {
+        toast.success("Discount code applied! Course unlocked for free 🎉");
+        loadData();
+      } else if (result.authorization_url) {
         window.location.href = result.authorization_url;
       } else {
         toast.error(result.error || "Payment initialization failed");
@@ -212,6 +217,15 @@ export default function Dashboard() {
                       <div className="flex items-center justify-between text-sm">
                         <span className="font-semibold text-foreground">{formatNaira(price)}</span>
                         <Lock className="h-4 w-4 text-muted-foreground" />
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Tag className="h-4 w-4 text-muted-foreground shrink-0" />
+                        <Input
+                          placeholder="Discount code"
+                          value={discountCodes[course.id] || ""}
+                          onChange={(e) => setDiscountCodes(prev => ({ ...prev, [course.id]: e.target.value }))}
+                          className="h-8 text-xs"
+                        />
                       </div>
                       <Button
                         onClick={() => handlePayment(course.id)}
