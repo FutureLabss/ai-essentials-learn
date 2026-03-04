@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { markLessonComplete, getUserProgress, getWeeksWithLessons, getCourse, getUserEnrollment } from "@/lib/supabase-helpers";
+import { markLessonComplete, getUserProgress, getWeeksWithLessons, getCourseById, getUserEnrollment } from "@/lib/supabase-helpers";
 import AppShell from "@/components/AppShell";
 import CourseSidebar from "@/components/CourseSidebar";
 import AiTutorChat from "@/components/AiTutorChat";
@@ -39,9 +39,10 @@ export default function Lesson() {
     const { data: weekData } = await supabase.from("weeks").select("*").eq("id", lessonData.week_id).single();
     setWeek(weekData);
 
-    const courseData = await getCourse();
+    if (!weekData) { navigate("/dashboard"); return; }
+    const courseData = await getCourseById(weekData.course_id);
     setCourseData(courseData);
-    const weeksData = await getWeeksWithLessons(courseData.id);
+    const weeksData = await getWeeksWithLessons(weekData.course_id);
     setWeeks(weeksData);
     const ordered = weeksData.flatMap(w => w.lessons);
     setAllLessons(ordered);
@@ -66,12 +67,11 @@ export default function Lesson() {
     const updatedProgress = [...progress, { lesson_id: id, completed: true }];
     setProgress(updatedProgress);
     const completedIds = new Set(updatedProgress.filter(p => p.completed).map(p => p.lesson_id));
-    if (allLessons.every(l => completedIds.has(l.id))) {
-      const courseData = await getCourse();
+    if (allLessons.every(l => completedIds.has(l.id)) && course) {
       const certId = `CERT-${Date.now()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
       await supabase.from("certificates").insert({
         user_id: user.id,
-        course_id: courseData.id,
+        course_id: course.id,
         certificate_id: certId,
       });
       toast.success("🎉 Congratulations! Your certificate is ready!");
