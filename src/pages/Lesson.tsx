@@ -27,6 +27,15 @@ export default function Lesson() {
 
   useEffect(() => {
     if (!user || !id) return;
+    // Reset state when lesson changes to prevent stale data from another course
+    setLesson(null);
+    setWeek(null);
+    setWeeks([]);
+    setCourseData(null);
+    setAllLessons([]);
+    setProgress([]);
+    setEnrollment(null);
+    setIsCompleted(false);
     loadLesson();
   }, [id, user]);
 
@@ -37,9 +46,9 @@ export default function Lesson() {
     setLesson(lessonData);
 
     const { data: weekData } = await supabase.from("weeks").select("*").eq("id", lessonData.week_id).single();
+    if (!weekData) { navigate("/dashboard"); return; }
     setWeek(weekData);
 
-    if (!weekData) { navigate("/dashboard"); return; }
     const courseData = await getCourseById(weekData.course_id);
     setCourseData(courseData);
     const weeksData = await getWeeksWithLessons(weekData.course_id);
