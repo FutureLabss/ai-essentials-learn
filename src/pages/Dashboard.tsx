@@ -137,7 +137,7 @@ export default function Dashboard() {
 
   const getEnrollment = (courseId: string) => enrollments.find(e => e.course_id === courseId);
   const getCert = (courseId: string) => certificates.find((c: any) => c?.course_id === courseId);
-  const hasLessons = (courseId: string) => courseId === "a1b2c3d4-e5f6-7890-abcd-ef1234567890"; // Only AI Essentials has lessons for now
+  const hasLessons = (_courseId: string) => true; // All courses now have content
 
   if (authLoading || loading) {
     return <AppShell><div className="container py-12 text-center text-muted-foreground">Loading…</div></AppShell>;
