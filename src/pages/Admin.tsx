@@ -21,10 +21,12 @@ export default function Admin() {
   const [loading, setLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [userProgress, setUserProgress] = useState<any[]>([]);
+  const [userEnrollments, setUserEnrollments] = useState<any[]>([]);
   const [userEnrollment, setUserEnrollment] = useState<any>(null);
   const [userCert, setUserCert] = useState<any>(null);
   const [allLessons, setAllLessons] = useState<any[]>([]);
   const [selectedCourseId, setSelectedCourseId] = useState<string>("");
+  const [allEnrollments, setAllEnrollments] = useState<any[]>([]);
   const [editingCourse, setEditingCourse] = useState<any>(null);
   useEffect(() => {
     if (authLoading) return;
@@ -44,6 +46,8 @@ export default function Admin() {
       if (cList.length > 0) {
         setSelectedCourseId(cList[0].id);
       }
+      const { data: enrollments } = await supabase.from("enrollments").select("*");
+      setAllEnrollments(enrollments || []);
       await loadUsers("");
     } catch (err) {
       console.error(err);
@@ -81,17 +85,19 @@ export default function Admin() {
 
   const openUser = async (profile: any) => {
     setSelectedUser(profile);
-    if (!selectedCourseId) return;
 
-    // Optimized fetching
-    const [prog, enr, cert] = await Promise.all([
+    const [prog, enrs, cert] = await Promise.all([
       supabase.from("lesson_progress").select("*").eq("user_id", profile.user_id),
-      supabase.from("enrollments").select("*").eq("user_id", profile.user_id).eq("course_id", selectedCourseId).maybeSingle(),
-      supabase.from("certificates").select("*").eq("user_id", profile.user_id).eq("course_id", selectedCourseId).maybeSingle()
+      supabase.from("enrollments").select("*").eq("user_id", profile.user_id),
+      selectedCourseId
+        ? supabase.from("certificates").select("*").eq("user_id", profile.user_id).eq("course_id", selectedCourseId).maybeSingle()
+        : Promise.resolve({ data: null }),
     ]);
 
     setUserProgress(prog.data || []);
-    setUserEnrollment(enr.data);
+    setUserEnrollments(enrs.data || []);
+    const currentEnr = (enrs.data || []).find((e: any) => e.course_id === selectedCourseId) || null;
+    setUserEnrollment(currentEnr);
     setUserCert(cert.data);
   };
 
@@ -141,7 +147,7 @@ export default function Admin() {
           <h1 className="font-display text-2xl font-bold">Admin Dashboard</h1>
           <AdminCourseManager onCourseCreated={initAdmin} />
         </div>
-        <p className="text-muted-foreground text-sm mb-4">{users.length} learners · {courses.length} courses</p>
+        <p className="text-muted-foreground text-sm mb-4">{users.length} learners · {courses.length} courses · {allEnrollments.length} total enrollments</p>
 
         {/* Course list with edit buttons */}
         <div className="rounded-lg border bg-card divide-y mb-6">
@@ -189,24 +195,30 @@ export default function Admin() {
         </div>
 
         <div className="rounded-lg border bg-card divide-y">
-          {users.map(u => (
-            <div key={u.id} className="flex items-center justify-between px-4 py-3 hover:bg-muted/50 cursor-pointer" onClick={() => openUser(u)}>
-              <div className="min-w-0">
-                <p className="text-sm font-medium truncate">
-                  {u.first_name || ""} {u.last_name || ""} {!u.first_name && !u.last_name && u.email}
-                </p>
-                <p className="text-xs text-muted-foreground truncate">{u.email}</p>
+          {users.map(u => {
+            const userEnrCount = allEnrollments.filter(e => e.user_id === u.user_id).length;
+            return (
+              <div key={u.id} className="flex items-center justify-between px-4 py-3 hover:bg-muted/50 cursor-pointer" onClick={() => openUser(u)}>
+                <div className="min-w-0">
+                  <p className="text-sm font-medium truncate">
+                    {u.first_name || ""} {u.last_name || ""} {!u.first_name && !u.last_name && u.email}
+                  </p>
+                  <p className="text-xs text-muted-foreground truncate">{u.email}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  {userEnrCount > 0 && (
+                    <Badge variant="default" className="text-xs">{userEnrCount} enrolled</Badge>
+                  )}
+                  {u.kyc_completed ? (
+                    <Badge variant="secondary" className="text-xs">KYC Done</Badge>
+                  ) : (
+                    <Badge variant="outline" className="text-xs">KYC Pending</Badge>
+                  )}
+                  <Eye className="h-4 w-4 text-muted-foreground" />
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                {u.kyc_completed ? (
-                  <Badge variant="secondary" className="text-xs">KYC Done</Badge>
-                ) : (
-                  <Badge variant="outline" className="text-xs">KYC Pending</Badge>
-                )}
-                <Eye className="h-4 w-4 text-muted-foreground" />
-              </div>
-            </div>
-          ))}
+            );
+          })}
           {users.length === 0 && (
             <div className="py-8 text-center text-muted-foreground text-sm">No learners found</div>
           )}
@@ -222,13 +234,57 @@ export default function Admin() {
             </DialogHeader>
             {selectedUser && (
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-2 text-sm">
-                  <div><span className="text-muted-foreground">Email:</span> {selectedUser.email}</div>
-                  <div><span className="text-muted-foreground">Phone:</span> {selectedUser.phone || "—"}</div>
-                  <div><span className="text-muted-foreground">Country:</span> {selectedUser.country || "—"}</div>
-                  <div><span className="text-muted-foreground">KYC:</span> {selectedUser.kyc_completed ? "✅" : "❌"}</div>
+                {/* Full Profile Data */}
+                <div>
+                  <h4 className="font-semibold text-sm mb-2">Profile Information</h4>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div><span className="text-muted-foreground">Email:</span> {selectedUser.email}</div>
+                    <div><span className="text-muted-foreground">Phone:</span> {selectedUser.phone || "—"}</div>
+                    <div><span className="text-muted-foreground">Gender:</span> {selectedUser.gender || "—"}</div>
+                    <div><span className="text-muted-foreground">DOB:</span> {selectedUser.date_of_birth || "—"}</div>
+                    <div><span className="text-muted-foreground">Country:</span> {selectedUser.country || "—"}</div>
+                    <div><span className="text-muted-foreground">State:</span> {selectedUser.state_region || "—"}</div>
+                    <div><span className="text-muted-foreground">City:</span> {selectedUser.city_town || "—"}</div>
+                    <div><span className="text-muted-foreground">Education:</span> {selectedUser.education_level || "—"}</div>
+                    <div><span className="text-muted-foreground">Occupation:</span> {selectedUser.occupation || "—"}</div>
+                    <div><span className="text-muted-foreground">Device:</span> {selectedUser.device_used || "—"}</div>
+                    <div className="col-span-2"><span className="text-muted-foreground">Reason:</span> {selectedUser.reason_for_course || "—"}</div>
+                    <div><span className="text-muted-foreground">KYC:</span> {selectedUser.kyc_completed ? "✅ Completed" : "❌ Pending"}</div>
+                    <div><span className="text-muted-foreground">Joined:</span> {new Date(selectedUser.created_at).toLocaleDateString()}</div>
+                  </div>
                 </div>
 
+                {/* All Enrollments */}
+                <div>
+                  <h4 className="font-semibold text-sm mb-2">Enrollments ({userEnrollments.length})</h4>
+                  {userEnrollments.length === 0 ? (
+                    <p className="text-xs text-muted-foreground">Not enrolled in any course</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {userEnrollments.map((enr: any) => {
+                        const courseName = courses.find(c => c.id === enr.course_id)?.name || "Unknown";
+                        return (
+                          <div key={enr.id} className="flex items-center justify-between p-2 rounded border text-xs">
+                            <div>
+                              <p className="font-medium">{courseName}</p>
+                              <p className="text-muted-foreground">Enrolled: {new Date(enr.enrolled_at).toLocaleDateString()}</p>
+                            </div>
+                            <div className="flex gap-1">
+                              <Badge variant={enr.is_paid ? "default" : "outline"} className="text-xs">
+                                {enr.is_paid ? "Paid" : "Unpaid"}
+                              </Badge>
+                              <Badge variant={enr.is_unlocked ? "secondary" : "outline"} className="text-xs">
+                                {enr.is_unlocked ? "Unlocked" : "Locked"}
+                              </Badge>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                {/* Actions for selected course */}
                 <div className="flex gap-2 flex-wrap">
                   {(!userEnrollment || !userEnrollment.is_unlocked) && (
                     <>
@@ -240,12 +296,6 @@ export default function Admin() {
                   )}
                   <Button size="sm" variant="outline" onClick={reissueCert}><RefreshCw className="h-4 w-4 mr-1" /> Reissue Cert</Button>
                 </div>
-
-                {userEnrollment && (
-                  <Badge variant={userEnrollment.is_unlocked ? "default" : "outline"}>
-                    {userEnrollment.is_unlocked ? "Course Unlocked" : "Course Locked"}
-                  </Badge>
-                )}
 
                 {userCert && (
                   <div className="text-sm p-3 rounded bg-accent/10 border border-accent/30">
