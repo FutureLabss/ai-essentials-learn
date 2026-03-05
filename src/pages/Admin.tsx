@@ -8,9 +8,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Search, Eye, UserPlus, Unlock, RefreshCw, CheckCircle, Circle, Pencil, Download } from "lucide-react";
+import { Search, Eye, UserPlus, Unlock, RefreshCw, CheckCircle, Circle, Pencil, Download, ShieldCheck, ShieldOff } from "lucide-react";
 import AdminCourseManager from "@/components/AdminCourseManager";
 import { toast } from "sonner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Admin() {
   const { user, role, loading: authLoading } = useAuth();
@@ -28,6 +29,8 @@ export default function Admin() {
   const [selectedCourseId, setSelectedCourseId] = useState<string>("");
   const [allEnrollments, setAllEnrollments] = useState<any[]>([]);
   const [editingCourse, setEditingCourse] = useState<any>(null);
+  const [tutors, setTutors] = useState<any[]>([]);
+  const [tutorSearch, setTutorSearch] = useState("");
   useEffect(() => {
     if (authLoading) return;
     if (!user) { navigate("/login"); return; }
@@ -48,10 +51,32 @@ export default function Admin() {
       }
       const { data: enrollments } = await supabase.from("enrollments").select("*");
       setAllEnrollments(enrollments || []);
-      await loadUsers("");
+      await Promise.all([loadUsers(""), loadTutors()]);
     } catch (err) {
       console.error(err);
     }
+  };
+
+  const loadTutors = async () => {
+    const { data: tutorRoles } = await supabase.from("user_roles").select("*").eq("role", "tutor");
+    if (!tutorRoles || tutorRoles.length === 0) { setTutors([]); return; }
+    const tutorUserIds = tutorRoles.map(r => r.user_id);
+    const { data: tutorProfiles } = await supabase.from("profiles").select("*").in("user_id", tutorUserIds);
+    setTutors(tutorProfiles || []);
+  };
+
+  const promoteTutor = async (userId: string) => {
+    const { error } = await supabase.from("user_roles").insert({ user_id: userId, role: "tutor" as any });
+    if (error) { toast.error("Failed to promote: " + error.message); return; }
+    toast.success("User promoted to tutor!");
+    loadTutors();
+  };
+
+  const demoteTutor = async (userId: string) => {
+    const { error } = await supabase.from("user_roles").delete().eq("user_id", userId).eq("role", "tutor" as any);
+    if (error) { toast.error("Failed to demote: " + error.message); return; }
+    toast.success("Tutor role removed.");
+    loadTutors();
   };
 
   useEffect(() => {
@@ -202,22 +227,153 @@ export default function Admin() {
             <AdminCourseManager onCourseCreated={initAdmin} />
           </div>
         </div>
-        <p className="text-muted-foreground text-sm mb-4">{users.length} learners · {courses.length} courses · {allEnrollments.length} total enrollments</p>
+        <p className="text-muted-foreground text-sm mb-4">{users.length} learners · {tutors.length} tutors · {courses.length} courses · {allEnrollments.length} enrollments</p>
 
-        {/* Course list with edit buttons */}
-        <div className="rounded-lg border bg-card divide-y mb-6">
-          {courses.map(c => (
-            <div key={c.id} className="flex items-center justify-between px-4 py-2">
-              <div className="min-w-0">
-                <p className="text-sm font-medium truncate">{c.name}</p>
-                <p className="text-xs text-muted-foreground">{c.duration_weeks} weeks</p>
-              </div>
-              <Button size="sm" variant="ghost" onClick={() => setEditingCourse(c)}>
-                <Pencil className="h-3.5 w-3.5 mr-1" /> Edit
-              </Button>
+        <Tabs defaultValue="learners" className="mb-6">
+          <TabsList className="mb-4">
+            <TabsTrigger value="learners">Learners</TabsTrigger>
+            <TabsTrigger value="tutors">Tutors</TabsTrigger>
+            <TabsTrigger value="courses">Courses</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="courses">
+            {/* Course list with edit buttons */}
+            <div className="rounded-lg border bg-card divide-y">
+              {courses.map(c => (
+                <div key={c.id} className="flex items-center justify-between px-4 py-2">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium truncate">{c.name}</p>
+                    <p className="text-xs text-muted-foreground">{c.duration_weeks} weeks</p>
+                  </div>
+                  <Button size="sm" variant="ghost" onClick={() => setEditingCourse(c)}>
+                    <Pencil className="h-3.5 w-3.5 mr-1" /> Edit
+                  </Button>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </TabsContent>
+
+          <TabsContent value="tutors">
+            <div className="space-y-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  className="pl-9"
+                  placeholder="Search users to promote..."
+                  value={tutorSearch}
+                  onChange={e => setTutorSearch(e.target.value)}
+                />
+              </div>
+
+              {/* Current tutors */}
+              <div>
+                <h3 className="text-sm font-semibold mb-2">Current Tutors ({tutors.length})</h3>
+                <div className="rounded-lg border bg-card divide-y">
+                  {tutors.length === 0 && (
+                    <div className="py-6 text-center text-muted-foreground text-sm">No tutors assigned yet</div>
+                  )}
+                  {tutors.map(t => (
+                    <div key={t.id} className="flex items-center justify-between px-4 py-3">
+                      <div>
+                        <p className="text-sm font-medium">{t.first_name || ""} {t.last_name || ""}</p>
+                        <p className="text-xs text-muted-foreground">{t.email}</p>
+                      </div>
+                      <Button size="sm" variant="destructive" onClick={() => demoteTutor(t.user_id)}>
+                        <ShieldOff className="h-3.5 w-3.5 mr-1" /> Remove
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Promote from users list */}
+              {tutorSearch && (
+                <div>
+                  <h3 className="text-sm font-semibold mb-2">Search Results</h3>
+                  <div className="rounded-lg border bg-card divide-y">
+                    {users
+                      .filter(u => {
+                        const q = tutorSearch.toLowerCase();
+                        const isTutor = tutors.some(t => t.user_id === u.user_id);
+                        return !isTutor && (
+                          u.email?.toLowerCase().includes(q) ||
+                          u.first_name?.toLowerCase().includes(q) ||
+                          u.last_name?.toLowerCase().includes(q)
+                        );
+                      })
+                      .slice(0, 10)
+                      .map(u => (
+                        <div key={u.id} className="flex items-center justify-between px-4 py-3">
+                          <div>
+                            <p className="text-sm font-medium">{u.first_name || ""} {u.last_name || ""}</p>
+                            <p className="text-xs text-muted-foreground">{u.email}</p>
+                          </div>
+                          <Button size="sm" onClick={() => promoteTutor(u.user_id)}>
+                            <ShieldCheck className="h-3.5 w-3.5 mr-1" /> Make Tutor
+                          </Button>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="learners">
+            <div className="flex flex-col sm:flex-row gap-4 mb-6">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  className="pl-9"
+                  placeholder="Search learners..."
+                  value={search}
+                  onChange={e => handleSearch(e.target.value)}
+                />
+              </div>
+              <div className="w-full sm:w-64">
+                <select
+                  className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
+                  value={selectedCourseId}
+                  onChange={e => setSelectedCourseId(e.target.value)}
+                >
+                  {courses.map(c => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="rounded-lg border bg-card divide-y">
+              {users.map(u => {
+                const userEnrCount = allEnrollments.filter(e => e.user_id === u.user_id).length;
+                return (
+                  <div key={u.id} className="flex items-center justify-between px-4 py-3 hover:bg-muted/50 cursor-pointer" onClick={() => openUser(u)}>
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium truncate">
+                        {u.first_name || ""} {u.last_name || ""} {!u.first_name && !u.last_name && u.email}
+                      </p>
+                      <p className="text-xs text-muted-foreground truncate">{u.email}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {userEnrCount > 0 && (
+                        <Badge variant="default" className="text-xs">{userEnrCount} enrolled</Badge>
+                      )}
+                      {u.kyc_completed ? (
+                        <Badge variant="secondary" className="text-xs">KYC Done</Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-xs">KYC Pending</Badge>
+                      )}
+                      <Eye className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                  </div>
+                );
+              })}
+              {users.length === 0 && (
+                <div className="py-8 text-center text-muted-foreground text-sm">No learners found</div>
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
 
         <AdminCourseManager
           onCourseCreated={() => { setEditingCourse(null); initAdmin(); }}
@@ -225,59 +381,6 @@ export default function Admin() {
           open={!!editingCourse}
           onOpenChange={(v) => { if (!v) setEditingCourse(null); }}
         />
-
-        <div className="flex flex-col sm:flex-row gap-4 mb-6">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              className="pl-9"
-              placeholder="Search learners..."
-              value={search}
-              onChange={e => handleSearch(e.target.value)}
-            />
-          </div>
-          <div className="w-full sm:w-64">
-            <select
-              className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
-              value={selectedCourseId}
-              onChange={e => setSelectedCourseId(e.target.value)}
-            >
-              {courses.map(c => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        <div className="rounded-lg border bg-card divide-y">
-          {users.map(u => {
-            const userEnrCount = allEnrollments.filter(e => e.user_id === u.user_id).length;
-            return (
-              <div key={u.id} className="flex items-center justify-between px-4 py-3 hover:bg-muted/50 cursor-pointer" onClick={() => openUser(u)}>
-                <div className="min-w-0">
-                  <p className="text-sm font-medium truncate">
-                    {u.first_name || ""} {u.last_name || ""} {!u.first_name && !u.last_name && u.email}
-                  </p>
-                  <p className="text-xs text-muted-foreground truncate">{u.email}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  {userEnrCount > 0 && (
-                    <Badge variant="default" className="text-xs">{userEnrCount} enrolled</Badge>
-                  )}
-                  {u.kyc_completed ? (
-                    <Badge variant="secondary" className="text-xs">KYC Done</Badge>
-                  ) : (
-                    <Badge variant="outline" className="text-xs">KYC Pending</Badge>
-                  )}
-                  <Eye className="h-4 w-4 text-muted-foreground" />
-                </div>
-              </div>
-            );
-          })}
-          {users.length === 0 && (
-            <div className="py-8 text-center text-muted-foreground text-sm">No learners found</div>
-          )}
-        </div>
 
         {/* User Detail Dialog */}
         <Dialog open={!!selectedUser} onOpenChange={() => setSelectedUser(null)}>
