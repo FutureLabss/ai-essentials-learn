@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Search, Eye, UserPlus, Unlock, RefreshCw, CheckCircle, Circle, Pencil } from "lucide-react";
+import { Search, Eye, UserPlus, Unlock, RefreshCw, CheckCircle, Circle, Pencil, Download } from "lucide-react";
 import AdminCourseManager from "@/components/AdminCourseManager";
 import { toast } from "sonner";
 
@@ -136,6 +136,56 @@ export default function Admin() {
 
   const completedLessonIds = new Set(userProgress.filter(p => p.completed).map(p => p.lesson_id));
 
+  const exportCSV = async () => {
+    try {
+      const { data: profiles } = await supabase.from("profiles").select("*").order("created_at", { ascending: false });
+      const { data: enrollments } = await supabase.from("enrollments").select("*");
+      const { data: payments } = await supabase.from("payments").select("*");
+      if (!profiles) return;
+
+      const headers = [
+        "First Name","Last Name","Email","Phone","Gender","Date of Birth",
+        "Country","State","City","Education","Occupation","Device",
+        "Reason for Course","KYC Completed","Joined",
+        "Courses Enrolled","Paid Courses","Total Paid (NGN)"
+      ];
+
+      const rows = profiles.map(p => {
+        const enrs = (enrollments || []).filter(e => e.user_id === p.user_id);
+        const paidPayments = (payments || []).filter(pay => pay.user_id === p.user_id && pay.status === "success");
+        const totalPaid = paidPayments.reduce((sum, pay) => sum + Number(pay.amount), 0);
+        const enrolledCourseNames = enrs.map(e => courses.find(c => c.id === e.course_id)?.name || e.course_id).join("; ");
+        const paidCourseNames = enrs.filter(e => e.is_paid).map(e => courses.find(c => c.id === e.course_id)?.name || e.course_id).join("; ");
+
+        return [
+          p.first_name || "", p.last_name || "", p.email, p.phone || "",
+          p.gender || "", p.date_of_birth || "", p.country || "",
+          p.state_region || "", p.city_town || "", p.education_level || "",
+          p.occupation || "", p.device_used || "", p.reason_for_course || "",
+          p.kyc_completed ? "Yes" : "No",
+          new Date(p.created_at).toLocaleDateString(),
+          enrolledCourseNames, paidCourseNames, totalPaid.toString()
+        ];
+      });
+
+      const csvContent = [headers, ...rows]
+        .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(","))
+        .join("\n");
+
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `enrollees-${new Date().toISOString().slice(0, 10)}.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
+      toast.success("CSV exported successfully");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to export CSV");
+    }
+  };
+
   if (authLoading || loading) {
     return <AppShell><div className="container py-12 text-center text-muted-foreground">Loading…</div></AppShell>;
   }
@@ -145,7 +195,12 @@ export default function Admin() {
       <div className="container max-w-3xl py-6">
         <div className="flex items-center justify-between mb-1">
           <h1 className="font-display text-2xl font-bold">Admin Dashboard</h1>
-          <AdminCourseManager onCourseCreated={initAdmin} />
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline" onClick={exportCSV}>
+              <Download className="h-4 w-4 mr-1" /> Export CSV
+            </Button>
+            <AdminCourseManager onCourseCreated={initAdmin} />
+          </div>
         </div>
         <p className="text-muted-foreground text-sm mb-4">{users.length} learners · {courses.length} courses · {allEnrollments.length} total enrollments</p>
 
