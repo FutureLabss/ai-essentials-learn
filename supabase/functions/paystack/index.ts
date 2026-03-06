@@ -44,7 +44,7 @@ Deno.serve(async (req) => {
     if (action === "initialize" && req.method === "POST") {
       const { courseId, amount, email, callbackUrl, discountCode } = await req.json();
 
-      // Apply discount code MANNY — 100% discount (free access)
+      // Apply discount code FUTURELABS — 100% discount (free access)
       if (discountCode && discountCode.toUpperCase() === "FUTURELABSELABS") {
         // Create enrollment and mark as paid immediately
         const serviceClient = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
