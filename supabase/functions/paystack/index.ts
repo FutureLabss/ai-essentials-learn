@@ -44,8 +44,8 @@ Deno.serve(async (req) => {
     if (action === "initialize" && req.method === "POST") {
       const { courseId, amount, email, callbackUrl, discountCode } = await req.json();
 
-      // Apply discount code MANNY — 100% discount (free access)
-      if (discountCode && discountCode.toUpperCase() === "MANNY") {
+      // Apply discount code FUTURELABS — 100% discount (free access)
+      if (discountCode && discountCode.toUpperCase() === "FUTURELABSELABS") {
         // Create enrollment and mark as paid immediately
         const serviceClient = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
         await serviceClient.from("enrollments").upsert(
@@ -53,7 +53,7 @@ Deno.serve(async (req) => {
           { onConflict: "user_id,course_id" }
         );
 
-        const ref = `DISC-MANNY-${Date.now()}`;
+        const ref = `FUTURELABSMANNY-${Date.now()}`;
         await supabase.from("payments").insert({
           user_id: userId,
           course_id: courseId,
