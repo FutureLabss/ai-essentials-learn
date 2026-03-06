@@ -192,12 +192,21 @@ export default function Dashboard() {
                   </p>
 
                   {cert ? (
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-medium text-success flex items-center gap-1">
-                        <Award className="h-4 w-4" /> Completed
-                      </span>
-                      <Button variant="outline" size="sm" asChild>
-                        <Link to="/certificate">View Certificate</Link>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-medium text-success flex items-center gap-1">
+                          <Award className="h-4 w-4" /> Completed
+                        </span>
+                        <Button variant="outline" size="sm" asChild>
+                          <Link to="/certificate">View Certificate</Link>
+                        </Button>
+                      </div>
+                      <Button
+                        variant="secondary"
+                        onClick={() => navigate(`/course/${course.id}`)}
+                        className="w-full"
+                      >
+                        Continue Learning <ArrowRight className="h-4 w-4 ml-1" />
                       </Button>
                     </div>
                   ) : isUnlocked && courseLessonsAvailable ? (
