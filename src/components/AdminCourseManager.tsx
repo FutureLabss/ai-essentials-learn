@@ -339,6 +339,11 @@ export default function AdminCourseManager({ onCourseCreated, editCourse, open: 
                       <div className="flex-1">
                         <Input placeholder="Week title *" value={week.title} onChange={e => updateWeek(wi, "title", e.target.value)} />
                       </div>
+                      {isEdit && week.id && (
+                        <Button size="icon" variant="ghost" className="text-primary" title="AI Improve this week" onClick={(e) => { e.stopPropagation(); setImprovingWeekIdx(wi); }}>
+                          <Sparkles className="h-4 w-4" />
+                        </Button>
+                      )}
                       {weeks.length > 1 && (
                         <Button size="icon" variant="ghost" className="text-destructive" onClick={() => removeWeek(wi)}>
                           <Trash2 className="h-4 w-4" />
