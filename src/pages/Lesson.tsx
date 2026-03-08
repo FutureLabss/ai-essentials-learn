@@ -133,9 +133,16 @@ export default function Lesson() {
 
               {/* Practical Task */}
               {lesson.practical_task && (
-                <div className="rounded-lg bg-accent/10 border border-accent/30 p-4 mb-8">
+                <div className="rounded-lg bg-accent/10 border border-accent/30 p-4 mb-4">
                   <h3 className="font-display font-semibold text-sm mb-2">📝 Practical Task</h3>
                   <p className="text-sm text-foreground/80">{lesson.practical_task}</p>
+                </div>
+              )}
+
+              {/* Assignment Submission */}
+              {lesson.practical_task && id && (
+                <div className="mb-8">
+                  <AssignmentSubmission lessonId={id} />
                 </div>
               )}
 
