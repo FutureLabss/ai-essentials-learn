@@ -154,10 +154,20 @@ export default function Dashboard() {
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
           <h1 className="font-display text-2xl font-bold mb-1">
-            Welcome back, {profile?.first_name || "Learner"} 👋
+            {t("dashboard.welcome", { name: profile?.first_name || "Learner" })}
           </h1>
-          <p className="text-muted-foreground text-sm">Choose a course to continue learning</p>
+          <p className="text-muted-foreground text-sm">{t("dashboard.subtitle")}</p>
         </motion.div>
+
+        {/* Progress Analytics */}
+        {enrollments.length > 0 && (
+          <ProgressAnalytics
+            progress={progress}
+            enrollments={enrollments}
+            courses={courses}
+            weeks={allWeeks}
+          />
+        )}
 
         {/* Course Grid */}
         <div className="grid gap-6 sm:grid-cols-2">

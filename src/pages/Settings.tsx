@@ -254,6 +254,8 @@ export default function SettingsPage() {
             </div>
           </div>
 
+          <LanguageSelector />
+          <NotificationReminder />
           <EmailPreferences />
         </motion.div>
       </div>
