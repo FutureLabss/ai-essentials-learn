@@ -151,6 +151,47 @@ export default function SettingsPage() {
           <h1 className="font-display text-2xl font-bold mb-1">Settings</h1>
           <p className="text-muted-foreground text-sm mb-6">Manage your preferences</p>
 
+          {/* Avatar section */}
+          <div className="flex items-center gap-4 mb-6">
+            <div className="relative group">
+              <Avatar className="h-20 w-20 border-2 border-border">
+                <AvatarImage src={(profile as any)?.avatar_url} alt="Profile" />
+                <AvatarFallback className="text-lg bg-primary/10 text-primary">
+                  {getInitials()}
+                </AvatarFallback>
+              </Avatar>
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                {uploading ? (
+                  <Loader2 className="h-5 w-5 text-white animate-spin" />
+                ) : (
+                  <Camera className="h-5 w-5 text-white" />
+                )}
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleAvatarUpload}
+                className="hidden"
+              />
+            </div>
+            <div>
+              <p className="font-medium">{profile?.first_name} {profile?.last_name}</p>
+              <p className="text-sm text-muted-foreground">{profile?.email}</p>
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className="text-sm text-primary hover:underline mt-1"
+              >
+                {uploading ? "Uploading…" : "Change photo"}
+              </button>
+            </div>
+          </div>
+
           <div className="rounded-lg border bg-card p-4 mb-6">
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-display font-semibold text-sm">Profile Information</h3>
