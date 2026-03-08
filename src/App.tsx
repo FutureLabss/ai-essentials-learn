@@ -16,6 +16,7 @@ import Certificate from "./pages/Certificate";
 import Admin from "./pages/Admin";
 import TutorDashboard from "./pages/TutorDashboard";
 import Settings from "./pages/Settings";
+import Install from "./pages/Install";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -40,6 +41,7 @@ const App = () => (
             <Route path="/settings" element={<Settings />} />
             <Route path="/tutor" element={<TutorDashboard />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/install" element={<Install />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
