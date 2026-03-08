@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.generate-quiz]
 verify_jwt = false
+
+[functions.improve-course]
+verify_jwt = false
