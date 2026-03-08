@@ -1,18 +1,18 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { BookOpen } from "lucide-react";
+import { BookOpen, MailCheck } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Signup() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
+  const [submitted, setSubmitted] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,10 +27,28 @@ export default function Signup() {
     if (error) {
       toast.error(error.message);
     } else {
-      toast.success("Check your email to verify your account, then log in.");
-      navigate("/login");
+      setSubmitted(true);
     }
   };
+
+  if (submitted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background px-4">
+        <div className="w-full max-w-sm text-center space-y-4">
+          <div className="mx-auto w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
+            <MailCheck className="h-7 w-7 text-primary" />
+          </div>
+          <h1 className="text-xl font-display font-bold">Check your inbox</h1>
+          <p className="text-muted-foreground text-sm">
+            We sent a verification link to <span className="font-medium text-foreground">{email}</span>. Click the link to activate your account.
+          </p>
+          <Link to="/login">
+            <Button variant="outline" className="mt-4">Go to Login</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
