@@ -22,6 +22,38 @@ export default defineConfig(({ mode }) => ({
       workbox: {
         navigateFallbackDenylist: [/^\/~oauth/],
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
+        runtimeCaching: [
+          {
+            // Cache lesson API responses for offline reading
+            urlPattern: /\/rest\/v1\/lessons/,
+            handler: "StaleWhileRevalidate",
+            options: {
+              cacheName: "lesson-content",
+              expiration: { maxEntries: 200, maxAgeSeconds: 7 * 24 * 60 * 60 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          {
+            // Cache weeks data
+            urlPattern: /\/rest\/v1\/weeks/,
+            handler: "StaleWhileRevalidate",
+            options: {
+              cacheName: "weeks-content",
+              expiration: { maxEntries: 50, maxAgeSeconds: 7 * 24 * 60 * 60 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          {
+            // Cache courses data
+            urlPattern: /\/rest\/v1\/courses/,
+            handler: "StaleWhileRevalidate",
+            options: {
+              cacheName: "courses-content",
+              expiration: { maxEntries: 20, maxAgeSeconds: 7 * 24 * 60 * 60 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+        ],
       },
       manifest: {
         name: "AI Essentials by FutureLabs",
