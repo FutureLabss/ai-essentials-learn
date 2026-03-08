@@ -15,6 +15,7 @@ import Dashboard from "./pages/Dashboard";
 import CourseDetail from "./pages/CourseDetail";
 import CourseLanding from "./pages/CourseLanding";
 import Lesson from "./pages/Lesson";
+import Quiz from "./pages/Quiz";
 import Certificate from "./pages/Certificate";
 import Admin from "./pages/Admin";
 import TutorDashboard from "./pages/TutorDashboard";
