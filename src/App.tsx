@@ -41,6 +41,7 @@ const App = () => (
             <Route path="/settings" element={<Settings />} />
             <Route path="/tutor" element={<TutorDashboard />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/install" element={<Install />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

@@ -14,6 +14,7 @@ import AdminEmailTab from "@/components/AdminEmailTab";
 import AdminAnalyticsTab from "@/components/AdminAnalyticsTab";
 import AdminDiscountTab from "@/components/AdminDiscountTab";
 import AdminBulkTab from "@/components/AdminBulkTab";
+import AdminTutorTab from "@/components/AdminTutorTab";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
