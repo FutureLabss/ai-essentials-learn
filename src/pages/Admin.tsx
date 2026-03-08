@@ -458,7 +458,45 @@ export default function Admin() {
           onOpenChange={(v) => { if (!v) setEditingCourse(null); }}
         />
 
-        {/* User Detail Dialog */}
+        {/* AI Improve Course Dialog */}
+        <Dialog open={!!improvingCourse} onOpenChange={(v) => { if (!v) { setImprovingCourse(null); setImproveInstructions(""); } }}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="font-display flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-primary" />
+                AI Improve Course
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                AI will analyze <strong>{improvingCourse?.name}</strong> and improve its content, learning objectives, and practical tasks.
+              </p>
+              <div>
+                <label className="text-sm font-medium">Instructions (optional)</label>
+                <Textarea
+                  value={improveInstructions}
+                  onChange={(e) => setImproveInstructions(e.target.value)}
+                  placeholder="e.g. Add more real-world examples, make content beginner-friendly, focus on practical applications..."
+                  rows={3}
+                />
+              </div>
+              <Button className="w-full" onClick={handleImproveCourse} disabled={improving}>
+                {improving ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Improving course…
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    Improve Course
+                  </>
+                )}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
         <Dialog open={!!selectedUser} onOpenChange={() => setSelectedUser(null)}>
           <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
             <DialogHeader>
