@@ -137,6 +137,30 @@ export type Database = {
         }
         Relationships: []
       }
+      email_logs: {
+        Row: {
+          id: string
+          milestone_type: string
+          reference_id: string | null
+          sent_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          milestone_type: string
+          reference_id?: string | null
+          sent_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          milestone_type?: string
+          reference_id?: string | null
+          sent_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       enrollments: {
         Row: {
           course_id: string
