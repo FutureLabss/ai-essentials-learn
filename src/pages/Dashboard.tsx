@@ -48,6 +48,11 @@ export default function Dashboard() {
         c.map(course => getUserCertificate(user.id, course.id))
       );
       setCertificates(certs.filter(Boolean));
+
+      // Load weeks for analytics
+      const weeksPromises = e.map(en => getWeeksWithLessons(en.course_id));
+      const weeksResults = await Promise.all(weeksPromises);
+      setAllWeeks(weeksResults.flat());
     } catch (err) {
       console.error(err);
     }
