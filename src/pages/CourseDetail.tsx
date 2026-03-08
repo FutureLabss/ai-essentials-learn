@@ -2,12 +2,13 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { getCourseById, getWeeksWithLessons, getUserEnrollment, getUserProgress, getUserCertificate } from "@/lib/supabase-helpers";
+import { supabase } from "@/integrations/supabase/client";
 import AppShell from "@/components/AppShell";
 import AiTutorChat from "@/components/AiTutorChat";
 import CourseReviews from "@/components/CourseReviews";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Lock, CheckCircle, Circle, Award, ChevronRight, ArrowLeft } from "lucide-react";
+import { Lock, CheckCircle, Circle, Award, ChevronRight, ArrowLeft, ClipboardList } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function CourseDetail() {
