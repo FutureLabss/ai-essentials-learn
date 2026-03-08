@@ -6,6 +6,7 @@ import { markLessonComplete, getUserProgress, getWeeksWithLessons, getCourseById
 import AppShell from "@/components/AppShell";
 import CourseSidebar from "@/components/CourseSidebar";
 import AiTutorChat from "@/components/AiTutorChat";
+import LessonNotes from "@/components/LessonNotes";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
@@ -135,6 +136,9 @@ export default function Lesson() {
                   <p className="text-sm text-foreground/80">{lesson.practical_task}</p>
                 </div>
               )}
+
+              {/* Notes */}
+              {id && <LessonNotes lessonId={id} />}
 
               {/* Video */}
               {lesson.video_url && (
