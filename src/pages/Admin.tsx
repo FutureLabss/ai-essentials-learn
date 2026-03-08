@@ -244,6 +244,7 @@ export default function Admin() {
             <TabsTrigger value="courses">Courses</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="discounts">Discounts</TabsTrigger>
+            <TabsTrigger value="quizzes">Quizzes</TabsTrigger>
             <TabsTrigger value="bulk">Bulk Ops</TabsTrigger>
             <TabsTrigger value="email">Email</TabsTrigger>
           </TabsList>
