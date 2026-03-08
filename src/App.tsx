@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -36,15 +37,15 @@ const App = () => (
             <Route path="/signup" element={<Signup />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/kyc" element={<KYC />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/course/:courseId" element={<CourseDetail />} />
+            <Route path="/kyc" element={<ProtectedRoute><KYC /></ProtectedRoute>} />
+            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/course/:courseId" element={<ProtectedRoute><CourseDetail /></ProtectedRoute>} />
             <Route path="/courses/:courseId" element={<CourseLanding />} />
-            <Route path="/lesson/:id" element={<Lesson />} />
-            <Route path="/certificate" element={<Certificate />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/tutor" element={<TutorDashboard />} />
-            <Route path="/admin" element={<Admin />} />
+            <Route path="/lesson/:id" element={<ProtectedRoute><Lesson /></ProtectedRoute>} />
+            <Route path="/certificate" element={<ProtectedRoute><Certificate /></ProtectedRoute>} />
+            <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+            <Route path="/tutor" element={<ProtectedRoute requiredRole="tutor"><TutorDashboard /></ProtectedRoute>} />
+            <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><Admin /></ProtectedRoute>} />
             <Route path="/install" element={<Install />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
