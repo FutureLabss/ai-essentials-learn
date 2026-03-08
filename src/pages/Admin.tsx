@@ -170,6 +170,82 @@ export default function Admin() {
     openUser(selectedUser);
   };
 
+  const handleImproveCourse = async () => {
+    if (!improvingCourse) return;
+    setImproving(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("improve-course", {
+        body: { courseId: improvingCourse.id, instructions: improveInstructions.trim() || undefined },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      // Normalize and open in edit mode with improved content
+      const normalized = {
+        ...improvingCourse,
+        name: data.name || improvingCourse.name,
+        description: data.description || improvingCourse.description,
+        duration_weeks: data.duration_weeks || improvingCourse.duration_weeks,
+      };
+
+      // Close improve dialog
+      setImprovingCourse(null);
+      setImproveInstructions("");
+
+      // Save improved content: delete old weeks/lessons, insert new ones
+      const courseId = improvingCourse.id;
+
+      // Update course metadata
+      await supabase.from("courses").update({
+        name: data.name?.trim() || improvingCourse.name,
+        description: data.description?.trim() || null,
+        duration_weeks: data.duration_weeks || improvingCourse.duration_weeks,
+      } as any).eq("id", courseId);
+
+      // Delete existing weeks/lessons
+      const { data: existingWeeks } = await supabase.from("weeks").select("id").eq("course_id", courseId);
+      if (existingWeeks && existingWeeks.length > 0) {
+        await supabase.from("lessons").delete().in("week_id", existingWeeks.map(w => w.id));
+      }
+      await supabase.from("weeks").delete().eq("course_id", courseId);
+
+      // Insert improved weeks and lessons
+      const weekInserts = (data.weeks || []).map((w: any, i: number) => ({
+        course_id: courseId,
+        week_number: i + 1,
+        title: w.title?.trim() || `Week ${i + 1}`,
+        description: w.description?.trim() || null,
+      }));
+      const { data: createdWeeks, error: weeksErr } = await supabase.from("weeks").insert(weekInserts).select();
+      if (weeksErr) throw weeksErr;
+
+      const sortedWeeks = [...createdWeeks].sort((a, b) => a.week_number - b.week_number);
+      const lessonInserts = sortedWeeks.flatMap((dbWeek, wi) =>
+        (data.weeks[wi]?.lessons || []).map((l: any, li: number) => ({
+          week_id: dbWeek.id,
+          lesson_number: li + 1,
+          title: l.title?.trim() || `Lesson ${li + 1}`,
+          content: l.content?.trim() || "",
+          video_url: l.video_url?.trim() || null,
+          learning_objective: l.learning_objective?.trim() || null,
+          practical_task: l.practical_task?.trim() || null,
+        }))
+      );
+      if (lessonInserts.length > 0) {
+        const { error: lessonsErr } = await supabase.from("lessons").insert(lessonInserts);
+        if (lessonsErr) throw lessonsErr;
+      }
+
+      toast.success(`Course "${data.name || improvingCourse.name}" improved and saved!`);
+      initAdmin();
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || "Failed to improve course");
+    } finally {
+      setImproving(false);
+    }
+  };
+
   const completedLessonIds = new Set(userProgress.filter(p => p.completed).map(p => p.lesson_id));
 
   const exportCSV = async () => {
