@@ -14,6 +14,7 @@ import CourseLanding from "./pages/CourseLanding";
 import Lesson from "./pages/Lesson";
 import Certificate from "./pages/Certificate";
 import Admin from "./pages/Admin";
+import TutorDashboard from "./pages/TutorDashboard";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
