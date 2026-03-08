@@ -7,6 +7,8 @@ import { AuthProvider } from "@/hooks/useAuth";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import KYC from "./pages/KYC";
 import Dashboard from "./pages/Dashboard";
 import CourseDetail from "./pages/CourseDetail";
