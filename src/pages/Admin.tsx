@@ -6,6 +6,7 @@ import { getAllCourses, getWeeksWithLessons } from "@/lib/supabase-helpers";
 import AppShell from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Search, Eye, UserPlus, Unlock, RefreshCw, CheckCircle, Circle, Pencil, Download, ShieldCheck, ShieldOff, EyeOff, Sparkles, Loader2 } from "lucide-react";
