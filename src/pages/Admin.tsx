@@ -262,69 +262,14 @@ export default function Admin() {
           </TabsContent>
 
           <TabsContent value="tutors">
-            <div className="space-y-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  className="pl-9"
-                  placeholder="Search users to promote..."
-                  value={tutorSearch}
-                  onChange={e => setTutorSearch(e.target.value)}
-                />
-              </div>
-
-              {/* Current tutors */}
-              <div>
-                <h3 className="text-sm font-semibold mb-2">Current Tutors ({tutors.length})</h3>
-                <div className="rounded-lg border bg-card divide-y">
-                  {tutors.length === 0 && (
-                    <div className="py-6 text-center text-muted-foreground text-sm">No tutors assigned yet</div>
-                  )}
-                  {tutors.map(t => (
-                    <div key={t.id} className="flex items-center justify-between px-4 py-3">
-                      <div>
-                        <p className="text-sm font-medium">{t.first_name || ""} {t.last_name || ""}</p>
-                        <p className="text-xs text-muted-foreground">{t.email}</p>
-                      </div>
-                      <Button size="sm" variant="destructive" onClick={() => demoteTutor(t.user_id)}>
-                        <ShieldOff className="h-3.5 w-3.5 mr-1" /> Remove
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Promote from users list */}
-              {tutorSearch && (
-                <div>
-                  <h3 className="text-sm font-semibold mb-2">Search Results</h3>
-                  <div className="rounded-lg border bg-card divide-y">
-                    {users
-                      .filter(u => {
-                        const q = tutorSearch.toLowerCase();
-                        const isTutor = tutors.some(t => t.user_id === u.user_id);
-                        return !isTutor && (
-                          u.email?.toLowerCase().includes(q) ||
-                          u.first_name?.toLowerCase().includes(q) ||
-                          u.last_name?.toLowerCase().includes(q)
-                        );
-                      })
-                      .slice(0, 10)
-                      .map(u => (
-                        <div key={u.id} className="flex items-center justify-between px-4 py-3">
-                          <div>
-                            <p className="text-sm font-medium">{u.first_name || ""} {u.last_name || ""}</p>
-                            <p className="text-xs text-muted-foreground">{u.email}</p>
-                          </div>
-                          <Button size="sm" onClick={() => promoteTutor(u.user_id)}>
-                            <ShieldCheck className="h-3.5 w-3.5 mr-1" /> Make Tutor
-                          </Button>
-                        </div>
-                      ))}
-                  </div>
-                </div>
-              )}
-            </div>
+            <AdminTutorTab
+              tutors={tutors}
+              users={users}
+              tutorSearch={tutorSearch}
+              setTutorSearch={setTutorSearch}
+              promoteTutor={promoteTutor}
+              demoteTutor={demoteTutor}
+            />
           </TabsContent>
 
           <TabsContent value="analytics">
