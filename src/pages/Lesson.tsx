@@ -137,6 +137,9 @@ export default function Lesson() {
                 </div>
               )}
 
+              {/* Notes */}
+              {id && <LessonNotes lessonId={id} />}
+
               {/* Video */}
               {lesson.video_url && (
                 <div className="mb-8">
