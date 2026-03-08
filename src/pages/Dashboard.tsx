@@ -152,7 +152,7 @@ export default function Dashboard() {
 
         {/* Course Grid */}
         <div className="grid gap-6 sm:grid-cols-2">
-          {courses.map((course, idx) => {
+          {courses.filter(c => !c.is_hidden).map((course, idx) => {
             const enrollment = getEnrollment(course.id);
             const cert = getCert(course.id);
             const isUnlocked = enrollment?.is_unlocked;

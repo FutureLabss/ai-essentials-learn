@@ -248,17 +248,32 @@ export default function Admin() {
           </TabsList>
 
           <TabsContent value="courses">
-            {/* Course list with edit buttons */}
+            {/* Course list with edit and hide buttons */}
             <div className="rounded-lg border bg-card divide-y">
               {courses.map(c => (
                 <div key={c.id} className="flex items-center justify-between px-4 py-2">
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium truncate">{c.name}</p>
-                    <p className="text-xs text-muted-foreground">{c.duration_weeks} weeks</p>
+                  <div className="min-w-0 flex items-center gap-2">
+                    <p className={`text-sm font-medium truncate ${c.is_hidden ? "text-muted-foreground line-through" : ""}`}>{c.name}</p>
+                    {c.is_hidden && <Badge variant="outline" className="text-xs">Hidden</Badge>}
                   </div>
-                  <Button size="sm" variant="ghost" onClick={() => setEditingCourse(c)}>
-                    <Pencil className="h-3.5 w-3.5 mr-1" /> Edit
-                  </Button>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={async () => {
+                        const { error } = await supabase.from("courses").update({ is_hidden: !c.is_hidden } as any).eq("id", c.id);
+                        if (error) { toast.error("Failed to update visibility"); return; }
+                        toast.success(c.is_hidden ? "Course is now visible" : "Course hidden from dashboard");
+                        initAdmin();
+                      }}
+                      title={c.is_hidden ? "Show course" : "Hide course"}
+                    >
+                      {c.is_hidden ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={() => setEditingCourse(c)}>
+                      <Pencil className="h-3.5 w-3.5 mr-1" /> Edit
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>
