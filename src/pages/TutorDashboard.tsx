@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { BookOpen, MessageCircle, Users, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
+import AiCourseGenerator from "@/components/AiCourseGenerator";
 
 export default function TutorDashboard() {
   const { user, role, loading: authLoading } = useAuth();
