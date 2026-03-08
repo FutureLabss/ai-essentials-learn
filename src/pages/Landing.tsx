@@ -1,13 +1,22 @@
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { BookOpen, CheckCircle, Zap, Award, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 
+interface Course {
+  id: string;
+  name: string;
+  description: string | null;
+  duration_weeks: number;
+}
+
 const features = [
-  { icon: BookOpen, title: "6-Week Course", desc: "Structured learning from the basics to practical AI skills" },
+  { icon: BookOpen, title: "Structured Courses", desc: "Learn step-by-step with weekly modules and practical tasks" },
   { icon: Zap, title: "Practical Focus", desc: "Learn by doing with real-world tasks and exercises" },
   { icon: CheckCircle, title: "Track Progress", desc: "Complete lessons at your pace with clear progress tracking" },
-  { icon: Award, title: "Get Certified", desc: "Earn a certificate when you complete the course" },
+  { icon: Award, title: "Get Certified", desc: "Earn a certificate when you complete a course" },
 ];
 
 const fadeUp = {
@@ -19,6 +28,19 @@ const fadeUp = {
 };
 
 export default function Landing() {
+  const [courses, setCourses] = useState<Course[]>([]);
+
+  useEffect(() => {
+    supabase
+      .from("courses")
+      .select("id, name, description, duration_weeks")
+      .eq("is_hidden", false)
+      .order("created_at")
+      .then(({ data }) => {
+        if (data) setCourses(data);
+      });
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       {/* Nav */}
@@ -26,7 +48,7 @@ export default function Landing() {
         <div className="container flex h-14 items-center justify-between">
           <div className="flex items-center gap-2 font-display font-bold text-lg text-primary">
             <BookOpen className="h-5 w-5" />
-            <span>AI Essentials</span>
+            <span>FutureLabs</span>
           </div>
           <div className="flex gap-2">
             <Button variant="ghost" size="sm" asChild>
@@ -52,11 +74,11 @@ export default function Landing() {
             By FutureLabs
           </div>
           <h1 className="font-display text-4xl md:text-5xl font-bold tracking-tight mb-4">
-            Learn AI Skills
-            <span className="block text-primary">For Real Work</span>
+            Build Future-Ready
+            <span className="block text-primary">Digital Skills</span>
           </h1>
           <p className="text-lg text-muted-foreground mb-8 max-w-lg mx-auto">
-            A practical 6-week course designed for beginners. No coding required. Learn to use AI tools that make your work faster and better.
+            Practical courses designed for beginners. No coding required. Learn skills that make your work faster and better.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Button size="lg" asChild>
@@ -70,6 +92,45 @@ export default function Landing() {
           </div>
         </motion.div>
       </section>
+
+      {/* Courses */}
+      {courses.length > 0 && (
+        <section className="container pb-16 md:pb-24">
+          <div className="max-w-2xl mx-auto">
+            <h2 className="font-display text-2xl font-bold text-center mb-8">Our Courses</h2>
+            <div className="grid grid-cols-1 gap-4">
+              {courses.map((course, i) => (
+                <motion.div
+                  key={course.id}
+                  variants={fadeUp}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true }}
+                  custom={i}
+                >
+                  <Link
+                    to={`/courses/${course.id}`}
+                    className="block rounded-lg border bg-card p-5 shadow-sm hover:border-primary/50 hover:shadow-md transition-all"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1">
+                        <h3 className="font-display font-semibold text-lg mb-1">{course.name}</h3>
+                        {course.description && (
+                          <p className="text-sm text-muted-foreground mb-2 line-clamp-2">{course.description}</p>
+                        )}
+                        <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                          {course.duration_weeks} weeks
+                        </span>
+                      </div>
+                      <ArrowRight className="h-5 w-5 text-muted-foreground shrink-0 mt-1" />
+                    </div>
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Features */}
       <section className="container pb-16 md:pb-24">
@@ -97,7 +158,7 @@ export default function Landing() {
         <div className="container py-12 text-center">
           <h2 className="font-display text-2xl font-bold mb-3">Ready to get started?</h2>
           <p className="text-primary-foreground/80 mb-6 max-w-md mx-auto">
-            Join learners who are building practical AI skills for the future of work.
+            Join learners who are building practical skills for the future of work.
           </p>
           <Button size="lg" variant="secondary" asChild>
             <Link to="/signup">Create Your Account</Link>
