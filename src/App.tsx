@@ -14,6 +14,7 @@ import CourseLanding from "./pages/CourseLanding";
 import Lesson from "./pages/Lesson";
 import Certificate from "./pages/Certificate";
 import Admin from "./pages/Admin";
+import TutorDashboard from "./pages/TutorDashboard";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
@@ -37,6 +38,7 @@ const App = () => (
             <Route path="/lesson/:id" element={<Lesson />} />
             <Route path="/certificate" element={<Certificate />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/tutor" element={<TutorDashboard />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

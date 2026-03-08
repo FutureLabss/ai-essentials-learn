@@ -2,7 +2,7 @@ import { ReactNode } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { LogOut, BookOpen, LayoutDashboard, Users, Settings } from "lucide-react";
+import { LogOut, BookOpen, LayoutDashboard, Users, Settings, GraduationCap } from "lucide-react";
 import SearchBar from "@/components/SearchBar";
 import NotificationBell from "@/components/NotificationBell";
 
@@ -33,6 +33,11 @@ export default function AppShell({ children }: { children: ReactNode }) {
                 {role === "admin" && (
                   <Button variant="ghost" size="sm" asChild>
                     <Link to="/admin"><Users className="h-4 w-4 sm:mr-1" /><span className="hidden sm:inline">Admin</span></Link>
+                  </Button>
+                )}
+                {(role === "tutor") && (
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link to="/tutor"><GraduationCap className="h-4 w-4 sm:mr-1" /><span className="hidden sm:inline">Tutor</span></Link>
                   </Button>
                 )}
                 {role !== "admin" && (

@@ -11,6 +11,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Search, Eye, UserPlus, Unlock, RefreshCw, CheckCircle, Circle, Pencil, Download, ShieldCheck, ShieldOff } from "lucide-react";
 import AdminCourseManager from "@/components/AdminCourseManager";
 import AdminEmailTab from "@/components/AdminEmailTab";
+import AdminAnalyticsTab from "@/components/AdminAnalyticsTab";
+import AdminDiscountTab from "@/components/AdminDiscountTab";
+import AdminBulkTab from "@/components/AdminBulkTab";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -231,10 +234,13 @@ export default function Admin() {
         <p className="text-muted-foreground text-sm mb-4">{users.length} learners · {tutors.length} tutors · {courses.length} courses · {allEnrollments.length} enrollments</p>
 
         <Tabs defaultValue="learners" className="mb-6">
-          <TabsList className="mb-4">
+          <TabsList className="mb-4 flex-wrap">
             <TabsTrigger value="learners">Learners</TabsTrigger>
             <TabsTrigger value="tutors">Tutors</TabsTrigger>
             <TabsTrigger value="courses">Courses</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="discounts">Discounts</TabsTrigger>
+            <TabsTrigger value="bulk">Bulk Ops</TabsTrigger>
             <TabsTrigger value="email">Email</TabsTrigger>
           </TabsList>
 
@@ -319,6 +325,18 @@ export default function Admin() {
                 </div>
               )}
             </div>
+          </TabsContent>
+
+          <TabsContent value="analytics">
+            <AdminAnalyticsTab />
+          </TabsContent>
+
+          <TabsContent value="discounts">
+            <AdminDiscountTab courses={courses} />
+          </TabsContent>
+
+          <TabsContent value="bulk">
+            <AdminBulkTab courses={courses} />
           </TabsContent>
 
           <TabsContent value="email">
