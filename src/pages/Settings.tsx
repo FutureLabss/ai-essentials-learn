@@ -1,9 +1,12 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import AppShell from "@/components/AppShell";
 import EmailPreferences from "@/components/EmailPreferences";
+import LanguageSelector from "@/components/LanguageSelector";
+import NotificationReminder from "@/components/NotificationReminder";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
