@@ -6,9 +6,10 @@ import { getAllCourses, getWeeksWithLessons } from "@/lib/supabase-helpers";
 import AppShell from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Search, Eye, UserPlus, Unlock, RefreshCw, CheckCircle, Circle, Pencil, Download, ShieldCheck, ShieldOff, EyeOff } from "lucide-react";
+import { Search, Eye, UserPlus, Unlock, RefreshCw, CheckCircle, Circle, Pencil, Download, ShieldCheck, ShieldOff, EyeOff, Sparkles, Loader2 } from "lucide-react";
 import AdminCourseManager from "@/components/AdminCourseManager";
 import AdminEmailTab from "@/components/AdminEmailTab";
 import AdminAnalyticsTab from "@/components/AdminAnalyticsTab";
@@ -36,6 +37,9 @@ export default function Admin() {
   const [selectedCourseId, setSelectedCourseId] = useState<string>("");
   const [allEnrollments, setAllEnrollments] = useState<any[]>([]);
   const [editingCourse, setEditingCourse] = useState<any>(null);
+  const [improvingCourse, setImprovingCourse] = useState<any>(null);
+  const [improveInstructions, setImproveInstructions] = useState("");
+  const [improving, setImproving] = useState(false);
   const [tutors, setTutors] = useState<any[]>([]);
   const [tutorSearch, setTutorSearch] = useState("");
   useEffect(() => {
@@ -166,6 +170,82 @@ export default function Admin() {
     openUser(selectedUser);
   };
 
+  const handleImproveCourse = async () => {
+    if (!improvingCourse) return;
+    setImproving(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("improve-course", {
+        body: { courseId: improvingCourse.id, instructions: improveInstructions.trim() || undefined },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      // Normalize and open in edit mode with improved content
+      const normalized = {
+        ...improvingCourse,
+        name: data.name || improvingCourse.name,
+        description: data.description || improvingCourse.description,
+        duration_weeks: data.duration_weeks || improvingCourse.duration_weeks,
+      };
+
+      // Close improve dialog
+      setImprovingCourse(null);
+      setImproveInstructions("");
+
+      // Save improved content: delete old weeks/lessons, insert new ones
+      const courseId = improvingCourse.id;
+
+      // Update course metadata
+      await supabase.from("courses").update({
+        name: data.name?.trim() || improvingCourse.name,
+        description: data.description?.trim() || null,
+        duration_weeks: data.duration_weeks || improvingCourse.duration_weeks,
+      } as any).eq("id", courseId);
+
+      // Delete existing weeks/lessons
+      const { data: existingWeeks } = await supabase.from("weeks").select("id").eq("course_id", courseId);
+      if (existingWeeks && existingWeeks.length > 0) {
+        await supabase.from("lessons").delete().in("week_id", existingWeeks.map(w => w.id));
+      }
+      await supabase.from("weeks").delete().eq("course_id", courseId);
+
+      // Insert improved weeks and lessons
+      const weekInserts = (data.weeks || []).map((w: any, i: number) => ({
+        course_id: courseId,
+        week_number: i + 1,
+        title: w.title?.trim() || `Week ${i + 1}`,
+        description: w.description?.trim() || null,
+      }));
+      const { data: createdWeeks, error: weeksErr } = await supabase.from("weeks").insert(weekInserts).select();
+      if (weeksErr) throw weeksErr;
+
+      const sortedWeeks = [...createdWeeks].sort((a, b) => a.week_number - b.week_number);
+      const lessonInserts = sortedWeeks.flatMap((dbWeek, wi) =>
+        (data.weeks[wi]?.lessons || []).map((l: any, li: number) => ({
+          week_id: dbWeek.id,
+          lesson_number: li + 1,
+          title: l.title?.trim() || `Lesson ${li + 1}`,
+          content: l.content?.trim() || "",
+          video_url: l.video_url?.trim() || null,
+          learning_objective: l.learning_objective?.trim() || null,
+          practical_task: l.practical_task?.trim() || null,
+        }))
+      );
+      if (lessonInserts.length > 0) {
+        const { error: lessonsErr } = await supabase.from("lessons").insert(lessonInserts);
+        if (lessonsErr) throw lessonsErr;
+      }
+
+      toast.success(`Course "${data.name || improvingCourse.name}" improved and saved!`);
+      initAdmin();
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || "Failed to improve course");
+    } finally {
+      setImproving(false);
+    }
+  };
+
   const completedLessonIds = new Set(userProgress.filter(p => p.completed).map(p => p.lesson_id));
 
   const exportCSV = async () => {
@@ -272,6 +352,9 @@ export default function Admin() {
                     >
                       {c.is_hidden ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
                     </Button>
+                    <Button size="sm" variant="ghost" onClick={() => setImprovingCourse(c)} title="AI Improve">
+                      <Sparkles className="h-3.5 w-3.5 mr-1" /> Improve
+                    </Button>
                     <Button size="sm" variant="ghost" onClick={() => setEditingCourse(c)}>
                       <Pencil className="h-3.5 w-3.5 mr-1" /> Edit
                     </Button>
@@ -375,7 +458,45 @@ export default function Admin() {
           onOpenChange={(v) => { if (!v) setEditingCourse(null); }}
         />
 
-        {/* User Detail Dialog */}
+        {/* AI Improve Course Dialog */}
+        <Dialog open={!!improvingCourse} onOpenChange={(v) => { if (!v) { setImprovingCourse(null); setImproveInstructions(""); } }}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="font-display flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-primary" />
+                AI Improve Course
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                AI will analyze <strong>{improvingCourse?.name}</strong> and improve its content, learning objectives, and practical tasks.
+              </p>
+              <div>
+                <label className="text-sm font-medium">Instructions (optional)</label>
+                <Textarea
+                  value={improveInstructions}
+                  onChange={(e) => setImproveInstructions(e.target.value)}
+                  placeholder="e.g. Add more real-world examples, make content beginner-friendly, focus on practical applications..."
+                  rows={3}
+                />
+              </div>
+              <Button className="w-full" onClick={handleImproveCourse} disabled={improving}>
+                {improving ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Improving course…
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    Improve Course
+                  </>
+                )}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
         <Dialog open={!!selectedUser} onOpenChange={() => setSelectedUser(null)}>
           <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
             <DialogHeader>
