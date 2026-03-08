@@ -69,6 +69,49 @@ export default function AdminCourseManager({ onCourseCreated, editCourse, open: 
   const [courseDescription, setCourseDescription] = useState("");
   const [durationWeeks, setDurationWeeks] = useState(6);
   const [weeks, setWeeks] = useState<WeekDraft[]>([emptyWeek()]);
+  const [improvingWeekIdx, setImprovingWeekIdx] = useState<number | null>(null);
+  const [weekImproveInstructions, setWeekImproveInstructions] = useState("");
+  const [weekImproving, setWeekImproving] = useState(false);
+
+  const handleImproveWeek = async (wi: number) => {
+    if (!editCourse) { toast.error("Save the course first before improving weeks"); return; }
+    const week = weeks[wi];
+    if (!week.id) { toast.error("Save the course first to improve this week"); return; }
+    setWeekImproving(true);
+    try {
+      const { data, error } = await sb.functions.invoke("improve-course", {
+        body: { courseId: editCourse.id, weekId: week.id, instructions: weekImproveInstructions.trim() || undefined },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      // Apply improved week data locally
+      setWeeks(prev => prev.map((w, i) => {
+        if (i !== wi) return w;
+        return {
+          ...w,
+          title: data.title || w.title,
+          description: data.description || w.description,
+          lessons: (data.lessons || []).map((l: any, li: number) => ({
+            id: w.lessons[li]?.id,
+            title: l.title?.trim() || `Lesson ${li + 1}`,
+            content: l.content?.trim() || "",
+            video_url: w.lessons[li]?.video_url || "",
+            learning_objective: l.learning_objective?.trim() || "",
+            practical_task: l.practical_task?.trim() || "",
+          })),
+        };
+      }));
+      toast.success(`Week ${wi + 1} improved! Review and save the course.`);
+      setImprovingWeekIdx(null);
+      setWeekImproveInstructions("");
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || "Failed to improve week");
+    } finally {
+      setWeekImproving(false);
+    }
+  };
 
   const isEdit = !!editCourse;
 
