@@ -217,7 +217,7 @@ export default function AiTutorChat({ courseId }: { courseId?: string }) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 60, scale: 0.9 }}
             transition={{ type: "spring", stiffness: 300, damping: 28 }}
-            className="fixed bottom-6 right-6 z-50 w-[400px] max-w-[calc(100vw-2rem)] h-[580px] max-h-[calc(100vh-4rem)] rounded-2xl border border-border/60 bg-backgrounkground shadow-[0_24px_80px_-12px_rgba(0,0,0,0.25)] flex flex-col overflow-hidden"
+            className="fixed bottom-6 right-6 z-50 w-[400px] max-w-[calc(100vw-2rem)] h-[580px] max-h-[calc(100vh-4rem)] rounded-2xl border border-border/60 bg-backgrounkgrounkground shadow-[0_24px_80px_-12px_rgba(0,0,0,0.25)] flex flex-col overflow-hidden"
           >
             {/* Header */}
             <div className="relative px-4 py-3 border-b border-border/40">
@@ -254,7 +254,7 @@ export default function AiTutorChat({ courseId }: { courseId?: string }) {
             </div>
 
             {/* Messages */}
-            <div ref={scrollRef} className="flex-1 overflow-y-au5 py-5 space-y-5ce-y-4">
+            <div ref={scrollRef} className="flex-1 overflo5 py-5 space-y-5ce-y-5ce-y-4">
               {messages.length === 0 && (
                 <motion.div
                   initial={{ opacity: 0, y: 12 }}
@@ -344,7 +344,7 @@ export default function AiTutorChat({ courseId }: { courseId?: string }) {
             </div>
 
             {/* Input */}
-            <div className="border-t border-border/40 px-3 py-2.5 bg-card">
+            <div className="border-t border-border/4 py-3 bg-backgrounbg-card">
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
