@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { getAllCourses, getUserEnrollments, getUserProgress, getUserCertificate, getWeeksWithLessons, COURSE_PRICES, formatNaira } from "@/lib/supabase-helpers";
+import { getAllCourses, getUserEnrollments, getUserProgress, getUserCertificate, COURSE_PRICES, formatNaira } from "@/lib/supabase-helpers";
 import AppShell from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Progress } from "@/components/ui/progress";
-import { BookOpen, Lock, Award, ArrowRight, Clock, Tag, CheckCircle } from "lucide-react";
+import { BookOpen, Lock, Award, ArrowRight, Clock, Tag } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,7 +17,6 @@ export default function Dashboard() {
   const [enrollments, setEnrollments] = useState<any[]>([]);
   const [progress, setProgress] = useState<any[]>([]);
   const [certificates, setCertificates] = useState<any[]>([]);
-  const [courseWeeks, setCourseWeeks] = useState<Record<string, any[]>>({});
   const [loading, setLoading] = useState(true);
   const [payingCourse, setPayingCourse] = useState<string | null>(null);
   const [discountCodes, setDiscountCodes] = useState<Record<string, string>>({});
@@ -42,18 +40,9 @@ export default function Dashboard() {
       setEnrollments(e);
       setProgress(p);
 
-      // Load weeks for progress calculation and certificates
-      const [weeksMap, certs] = await Promise.all([
-        Promise.all(c.map(async (course: any) => {
-          const weeks = await getWeeksWithLessons(course.id);
-          return { courseId: course.id, weeks };
-        })),
-        Promise.all(c.map((course: any) => getUserCertificate(user.id, course.id))),
-      ]);
-
-      const wMap: Record<string, any[]> = {};
-      weeksMap.forEach(({ courseId, weeks }) => { wMap[courseId] = weeks; });
-      setCourseWeeks(wMap);
+      const certs = await Promise.all(
+        c.map(course => getUserCertificate(user.id, course.id))
+      );
       setCertificates(certs.filter(Boolean));
     } catch (err) {
       console.error(err);
@@ -146,25 +135,6 @@ export default function Dashboard() {
   const getEnrollment = (courseId: string) => enrollments.find(e => e.course_id === courseId);
   const getCert = (courseId: string) => certificates.find((c: any) => c?.course_id === courseId);
 
-  const getCourseProgress = (courseId: string) => {
-    const weeks = courseWeeks[courseId] || [];
-    const totalLessons = weeks.reduce((sum: number, w: any) => sum + w.lessons.length, 0);
-    const lessonIds = new Set(weeks.flatMap((w: any) => w.lessons.map((l: any) => l.id)));
-    const completedLessons = progress.filter(p => p.completed && lessonIds.has(p.lesson_id)).length;
-    const pct = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
-    return { totalLessons, completedLessons, pct };
-  };
-
-  const getWeekProgress = (courseId: string) => {
-    const weeks = courseWeeks[courseId] || [];
-    const completedIds = new Set(progress.filter(p => p.completed).map(p => p.lesson_id));
-    return weeks.map((w: any) => {
-      const total = w.lessons.length;
-      const done = w.lessons.filter((l: any) => completedIds.has(l.id)).length;
-      return { ...w, total, done, pct: total > 0 ? Math.round((done / total) * 100) : 0 };
-    });
-  };
-
   if (authLoading || loading) {
     return <AppShell><div className="container py-12 text-center text-muted-foreground">Loading…</div></AppShell>;
   }
@@ -180,32 +150,6 @@ export default function Dashboard() {
           <p className="text-muted-foreground text-sm">Choose a course to continue learning</p>
         </motion.div>
 
-        {/* Overall Progress Summary for enrolled courses */}
-        {enrollments.filter(e => e.is_unlocked).length > 0 && (
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="mb-6 grid gap-3 sm:grid-cols-3">
-            {(() => {
-              const totalAll = Object.values(courseWeeks).reduce((sum, weeks) => sum + weeks.reduce((s: number, w: any) => s + w.lessons.length, 0), 0);
-              const completedAll = progress.filter(p => p.completed).length;
-              return (
-                <>
-                  <div className="rounded-lg border bg-card p-4 text-center">
-                    <p className="text-2xl font-bold text-primary">{enrollments.filter(e => e.is_unlocked).length}</p>
-                    <p className="text-xs text-muted-foreground">Active Courses</p>
-                  </div>
-                  <div className="rounded-lg border bg-card p-4 text-center">
-                    <p className="text-2xl font-bold text-primary">{completedAll}</p>
-                    <p className="text-xs text-muted-foreground">Lessons Completed</p>
-                  </div>
-                  <div className="rounded-lg border bg-card p-4 text-center">
-                    <p className="text-2xl font-bold text-primary">{certificates.length}</p>
-                    <p className="text-xs text-muted-foreground">Certificates</p>
-                  </div>
-                </>
-              );
-            })()}
-          </motion.div>
-        )}
-
         {/* Course Grid */}
         <div className="grid gap-6 sm:grid-cols-2">
           {courses.map((course, idx) => {
@@ -213,8 +157,6 @@ export default function Dashboard() {
             const cert = getCert(course.id);
             const isUnlocked = enrollment?.is_unlocked;
             const price = COURSE_PRICES[course.id] || 20000;
-            const { totalLessons, completedLessons, pct } = getCourseProgress(course.id);
-            const weekProg = isUnlocked ? getWeekProgress(course.id) : [];
 
             return (
               <motion.div
@@ -243,35 +185,6 @@ export default function Dashboard() {
                   <p className="text-sm text-muted-foreground mb-4 flex-1">
                     {course.description}
                   </p>
-
-                  {/* Progress bars for unlocked courses */}
-                  {isUnlocked && totalLessons > 0 && (
-                    <div className="mb-4 space-y-3">
-                      {/* Overall */}
-                      <div>
-                        <div className="flex justify-between items-center mb-1">
-                          <span className="text-xs font-medium">Overall Progress</span>
-                          <span className="text-xs text-muted-foreground">{completedLessons}/{totalLessons} · {pct}%</span>
-                        </div>
-                        <Progress value={pct} className="h-2" />
-                      </div>
-                      {/* Per-week mini bars */}
-                      <div className="space-y-1.5">
-                        {weekProg.map((w: any) => (
-                          <div key={w.id} className="flex items-center gap-2">
-                            <span className="text-[10px] text-muted-foreground w-10 shrink-0">Wk {w.week_number}</span>
-                            <div className="flex-1 bg-muted/30 rounded-full h-1.5 overflow-hidden">
-                              <div
-                                className={`h-full rounded-full transition-all ${w.pct === 100 ? "bg-green-500" : "bg-primary"}`}
-                                style={{ width: `${w.pct}%` }}
-                              />
-                            </div>
-                            {w.pct === 100 && <CheckCircle className="h-3 w-3 text-green-500 shrink-0" />}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
 
                   {cert ? (
                     <div className="space-y-2">
