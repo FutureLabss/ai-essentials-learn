@@ -113,6 +113,41 @@ export type Database = {
           },
         ]
       }
+      course_reviews: {
+        Row: {
+          course_id: string
+          created_at: string
+          id: string
+          rating: number
+          review: string | null
+          user_id: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          id?: string
+          rating: number
+          review?: string | null
+          user_id: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          id?: string
+          rating?: number
+          review?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_reviews_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       courses: {
         Row: {
           created_at: string
@@ -161,6 +196,39 @@ export type Database = {
         }
         Relationships: []
       }
+      email_preferences: {
+        Row: {
+          announcement_emails: boolean
+          completion_emails: boolean
+          id: string
+          progress_emails: boolean
+          reminder_emails: boolean
+          updated_at: string
+          user_id: string
+          welcome_emails: boolean
+        }
+        Insert: {
+          announcement_emails?: boolean
+          completion_emails?: boolean
+          id?: string
+          progress_emails?: boolean
+          reminder_emails?: boolean
+          updated_at?: string
+          user_id: string
+          welcome_emails?: boolean
+        }
+        Update: {
+          announcement_emails?: boolean
+          completion_emails?: boolean
+          id?: string
+          progress_emails?: boolean
+          reminder_emails?: boolean
+          updated_at?: string
+          user_id?: string
+          welcome_emails?: boolean
+        }
+        Relationships: []
+      }
       enrollments: {
         Row: {
           course_id: string
@@ -192,6 +260,48 @@ export type Database = {
             columns: ["course_id"]
             isOneToOne: false
             referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lesson_discussions: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          lesson_id: string
+          parent_id: string | null
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          lesson_id: string
+          parent_id?: string | null
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          lesson_id?: string
+          parent_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_discussions_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lesson_discussions_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "lesson_discussions"
             referencedColumns: ["id"]
           },
         ]
@@ -303,6 +413,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          is_read: boolean
+          link: string | null
+          message: string
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          link?: string | null
+          message: string
+          title: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          link?: string | null
+          message?: string
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       payments: {
         Row: {
