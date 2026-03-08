@@ -11,7 +11,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { courseId, instructions } = await req.json();
+    const { courseId, weekId, instructions } = await req.json();
     if (!courseId) {
       return new Response(JSON.stringify({ error: "courseId is required" }), {
         status: 400,
@@ -26,7 +26,7 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Fetch course with all weeks and lessons
+    // Fetch course
     const { data: course, error: courseErr } = await supabase
       .from("courses")
       .select("*")
@@ -34,6 +34,106 @@ serve(async (req) => {
       .single();
     if (courseErr) throw courseErr;
 
+    // If weekId is provided, improve only that week
+    if (weekId) {
+      const { data: week, error: weekErr } = await supabase
+        .from("weeks")
+        .select("*")
+        .eq("id", weekId)
+        .single();
+      if (weekErr) throw weekErr;
+
+      const { data: lessons, error: lessonsErr } = await supabase
+        .from("lessons")
+        .select("*")
+        .eq("week_id", weekId)
+        .order("lesson_number");
+      if (lessonsErr) throw lessonsErr;
+
+      const weekStructure = {
+        title: week.title,
+        description: week.description,
+        lessons: (lessons || []).map((l: any) => ({
+          title: l.title,
+          content: l.content,
+          learning_objective: l.learning_objective,
+          practical_task: l.practical_task,
+        })),
+      };
+
+      const systemPrompt = `You are an expert curriculum designer and course improvement specialist.
+You will receive a single week's content from the course "${course.name}" and optional improvement instructions.
+Your job is to improve this week while maintaining its core topic and lesson count.
+
+Improvements may include:
+- Enriching lesson content with more depth, examples, and clarity
+- Improving learning objectives to be more specific and measurable
+- Adding better practical tasks and exercises
+- Improving titles and descriptions
+- Adding more real-world examples and case studies
+
+Return your response ONLY as a valid JSON object (no markdown, no code fences) with this exact schema:
+{
+  "title": "Improved week title",
+  "description": "Improved week description",
+  "lessons": [
+    {
+      "title": "Lesson title",
+      "content": "Improved detailed lesson content (3-5 paragraphs)",
+      "learning_objective": "Specific measurable objective",
+      "practical_task": "Actionable hands-on exercise"
+    }
+  ]
+}
+
+Keep the same number of lessons unless the instructions say otherwise.
+Make every improvement meaningful — don't just rephrase, genuinely enhance the educational value.`;
+
+      const userPrompt = `Here is the current week structure:
+${JSON.stringify(weekStructure, null, 2)}
+
+${instructions ? `Specific improvement instructions: ${instructions}` : "Please improve this week's content quality, learning objectives, and practical tasks."}`;
+
+      const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash",
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt },
+          ],
+        }),
+      });
+
+      if (!response.ok) {
+        if (response.status === 429) {
+          return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }), {
+            status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        if (response.status === 402) {
+          return new Response(JSON.stringify({ error: "AI credits exhausted." }), {
+            status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        throw new Error("AI improvement failed");
+      }
+
+      const data = await response.json();
+      const raw = data.choices?.[0]?.message?.content || "";
+      const cleaned = raw.replace(/```json\s*/gi, "").replace(/```\s*/gi, "").trim();
+      const improved = JSON.parse(cleaned);
+
+      return new Response(JSON.stringify({ ...improved, weekId }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Full course improvement (existing behavior)
     const { data: weeks, error: weeksErr } = await supabase
       .from("weeks")
       .select("*")
@@ -53,7 +153,6 @@ serve(async (req) => {
       lessons = data || [];
     }
 
-    // Build current course structure for AI
     const currentStructure = {
       name: course.name,
       description: course.description,
@@ -131,14 +230,12 @@ ${instructions ? `Specific improvement instructions: ${instructions}` : "Please 
     if (!response.ok) {
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "AI credits exhausted. Please top up your workspace." }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        return new Response(JSON.stringify({ error: "AI credits exhausted." }), {
+          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       const errText = await response.text();
