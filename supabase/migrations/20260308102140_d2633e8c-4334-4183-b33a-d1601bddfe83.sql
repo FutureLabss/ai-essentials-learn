@@ -1,0 +1,1 @@
+ALTER TABLE public.courses ADD COLUMN is_hidden BOOLEAN NOT NULL DEFAULT false;
