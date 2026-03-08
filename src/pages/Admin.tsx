@@ -234,10 +234,13 @@ export default function Admin() {
         <p className="text-muted-foreground text-sm mb-4">{users.length} learners · {tutors.length} tutors · {courses.length} courses · {allEnrollments.length} enrollments</p>
 
         <Tabs defaultValue="learners" className="mb-6">
-          <TabsList className="mb-4">
+          <TabsList className="mb-4 flex-wrap">
             <TabsTrigger value="learners">Learners</TabsTrigger>
             <TabsTrigger value="tutors">Tutors</TabsTrigger>
             <TabsTrigger value="courses">Courses</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="discounts">Discounts</TabsTrigger>
+            <TabsTrigger value="bulk">Bulk Ops</TabsTrigger>
             <TabsTrigger value="email">Email</TabsTrigger>
           </TabsList>
 
