@@ -235,6 +235,7 @@ export default function Admin() {
             <TabsTrigger value="learners">Learners</TabsTrigger>
             <TabsTrigger value="tutors">Tutors</TabsTrigger>
             <TabsTrigger value="courses">Courses</TabsTrigger>
+            <TabsTrigger value="email">Email</TabsTrigger>
           </TabsList>
 
           <TabsContent value="courses">
