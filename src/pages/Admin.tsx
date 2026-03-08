@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Search, Eye, UserPlus, Unlock, RefreshCw, CheckCircle, Circle, Pencil, Download, ShieldCheck, ShieldOff } from "lucide-react";
+import { Search, Eye, UserPlus, Unlock, RefreshCw, CheckCircle, Circle, Pencil, Download, ShieldCheck, ShieldOff, EyeOff } from "lucide-react";
 import AdminCourseManager from "@/components/AdminCourseManager";
 import AdminEmailTab from "@/components/AdminEmailTab";
 import AdminAnalyticsTab from "@/components/AdminAnalyticsTab";
