@@ -36,6 +36,7 @@ const READ_ONLY_FIELDS = [
 
 export default function SettingsPage() {
   const { user, profile, loading, refreshProfile } = useAuth();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
