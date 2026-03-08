@@ -37,6 +37,9 @@ export default function Admin() {
   const [selectedCourseId, setSelectedCourseId] = useState<string>("");
   const [allEnrollments, setAllEnrollments] = useState<any[]>([]);
   const [editingCourse, setEditingCourse] = useState<any>(null);
+  const [improvingCourse, setImprovingCourse] = useState<any>(null);
+  const [improveInstructions, setImproveInstructions] = useState("");
+  const [improving, setImproving] = useState(false);
   const [tutors, setTutors] = useState<any[]>([]);
   const [tutorSearch, setTutorSearch] = useState("");
   useEffect(() => {
