@@ -40,6 +40,9 @@ export default function AppShell({ children }: { children: ReactNode }) {
                     <Link to="/dashboard"><LayoutDashboard className="h-4 w-4 sm:mr-1" /><span className="hidden sm:inline">Dashboard</span></Link>
                   </Button>
                 )}
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to="/settings"><Settings className="h-4 w-4" /></Link>
+                </Button>
                 <Button variant="ghost" size="sm" onClick={handleSignOut}>
                   <LogOut className="h-4 w-4" />
                 </Button>
