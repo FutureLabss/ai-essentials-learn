@@ -254,7 +254,7 @@ export default function AiTutorChat({ courseId }: { courseId?: string }) {
             </div>
 
             {/* Messages */}
-            <div ref={scrollRef} className="flex-1 overflo5 py-5 space-y-5ce-y-5ce-y-4">
+            <div ref={scrollRef} className="flex-1 overflow-y-auto px-5 py-5 space-y-5">
               {messages.length === 0 && (
                 <motion.div
                   initial={{ opacity: 0, y: 12 }}
