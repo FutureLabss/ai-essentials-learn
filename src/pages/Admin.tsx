@@ -327,6 +327,18 @@ export default function Admin() {
             </div>
           </TabsContent>
 
+          <TabsContent value="analytics">
+            <AdminAnalyticsTab />
+          </TabsContent>
+
+          <TabsContent value="discounts">
+            <AdminDiscountTab courses={courses} />
+          </TabsContent>
+
+          <TabsContent value="bulk">
+            <AdminBulkTab courses={courses} />
+          </TabsContent>
+
           <TabsContent value="email">
             <AdminEmailTab courses={courses} />
           </TabsContent>

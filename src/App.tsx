@@ -38,6 +38,7 @@ const App = () => (
             <Route path="/lesson/:id" element={<Lesson />} />
             <Route path="/certificate" element={<Certificate />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/tutor" element={<TutorDashboard />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
