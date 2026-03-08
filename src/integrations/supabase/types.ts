@@ -192,6 +192,7 @@ export type Database = {
           description: string | null
           duration_weeks: number
           id: string
+          is_hidden: boolean
           name: string
         }
         Insert: {
@@ -199,6 +200,7 @@ export type Database = {
           description?: string | null
           duration_weeks?: number
           id?: string
+          is_hidden?: boolean
           name: string
         }
         Update: {
@@ -206,6 +208,7 @@ export type Database = {
           description?: string | null
           duration_weeks?: number
           id?: string
+          is_hidden?: boolean
           name?: string
         }
         Relationships: []
