@@ -292,7 +292,7 @@ export default function AdminCourseManager({ onCourseCreated, editCourse, open: 
   };
 
   const dialogContent = (
-    <><DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
       <DialogHeader>
         <DialogTitle className="font-display flex items-center gap-2">
           <BookOpen className="h-5 w-5" /> {isEdit ? "Edit Course" : "Create New Course"}
