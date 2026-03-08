@@ -6,8 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Plus, Trash2, BookOpen, GripVertical } from "lucide-react";
+import { Plus, Trash2, BookOpen, GripVertical, Sparkles, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { supabase as sb } from "@/integrations/supabase/client";
 
 interface LessonDraft {
   id?: string;
