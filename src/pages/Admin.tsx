@@ -352,6 +352,9 @@ export default function Admin() {
                     >
                       {c.is_hidden ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
                     </Button>
+                    <Button size="sm" variant="ghost" onClick={() => setImprovingCourse(c)} title="AI Improve">
+                      <Sparkles className="h-3.5 w-3.5 mr-1" /> Improve
+                    </Button>
                     <Button size="sm" variant="ghost" onClick={() => setEditingCourse(c)}>
                       <Pencil className="h-3.5 w-3.5 mr-1" /> Edit
                     </Button>
