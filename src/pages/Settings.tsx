@@ -152,8 +152,8 @@ export default function SettingsPage() {
     <AppShell>
       <div className="container max-w-xl py-6">
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-          <h1 className="font-display text-2xl font-bold mb-1">Settings</h1>
-          <p className="text-muted-foreground text-sm mb-6">Manage your preferences</p>
+          <h1 className="font-display text-2xl font-bold mb-1">{t("settings.title")}</h1>
+          <p className="text-muted-foreground text-sm mb-6">{t("settings.subtitle")}</p>
 
           {/* Avatar section */}
           <div className="flex items-center gap-4 mb-6">
