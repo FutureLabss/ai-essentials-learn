@@ -11,6 +11,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Search, Eye, UserPlus, Unlock, RefreshCw, CheckCircle, Circle, Pencil, Download, ShieldCheck, ShieldOff } from "lucide-react";
 import AdminCourseManager from "@/components/AdminCourseManager";
 import AdminEmailTab from "@/components/AdminEmailTab";
+import AdminAnalyticsTab from "@/components/AdminAnalyticsTab";
+import AdminDiscountTab from "@/components/AdminDiscountTab";
+import AdminBulkTab from "@/components/AdminBulkTab";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
