@@ -141,6 +141,9 @@ export default function Lesson() {
               {/* Notes */}
               {id && <LessonNotes lessonId={id} />}
 
+              {/* Discussion */}
+              {id && <LessonDiscussion lessonId={id} />}
+
               {/* Video */}
               {lesson.video_url && (
                 <div className="mb-8">
