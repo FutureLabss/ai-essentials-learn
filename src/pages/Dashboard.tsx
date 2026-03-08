@@ -145,7 +145,7 @@ export default function Dashboard() {
   const getCert = (courseId: string) => certificates.find((c: any) => c?.course_id === courseId);
 
   if (authLoading || loading) {
-    return <AppShell><div className="container py-12 text-center text-muted-foreground">Loading…</div></AppShell>;
+    return <AppShell><div className="container py-12 text-center text-muted-foreground">{t("dashboard.loading")}</div></AppShell>;
   }
 
   return (
