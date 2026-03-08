@@ -2,7 +2,7 @@ import { ReactNode } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { LogOut, BookOpen, LayoutDashboard, Users } from "lucide-react";
+import { LogOut, BookOpen, LayoutDashboard, Users, Settings } from "lucide-react";
 import SearchBar from "@/components/SearchBar";
 import NotificationBell from "@/components/NotificationBell";
 
