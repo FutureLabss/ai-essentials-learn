@@ -14,6 +14,44 @@ export type Database = {
   }
   public: {
     Tables: {
+      assignment_submissions: {
+        Row: {
+          feedback: string | null
+          id: string
+          lesson_id: string
+          status: string
+          submission_link: string
+          submitted_at: string
+          user_id: string
+        }
+        Insert: {
+          feedback?: string | null
+          id?: string
+          lesson_id: string
+          status?: string
+          submission_link: string
+          submitted_at?: string
+          user_id: string
+        }
+        Update: {
+          feedback?: string | null
+          id?: string
+          lesson_id?: string
+          status?: string
+          submission_link?: string
+          submitted_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assignment_submissions_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       certificates: {
         Row: {
           certificate_id: string
