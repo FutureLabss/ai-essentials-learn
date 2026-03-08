@@ -133,14 +133,14 @@ export default function CourseSidebar({ weeks, progress, currentLessonId, isUnlo
           variant="outline"
           size="sm"
           onClick={() => setMobileOpen(true)}
-          className="fixed bottom-4 left-4 z-40 shadow-lg"
+          className="fixed top-16 left-3 z-40 shadow-lg bg-background/95 backdrop-blur-sm border-border"
         >
           <Menu className="h-4 w-4 mr-1" /> Curriculum
         </Button>
         {mobileOpen && (
           <>
-            <div className="fixed inset-0 bg-black/40 z-40" onClick={() => setMobileOpen(false)} />
-            <div className="fixed inset-y-0 left-0 w-72 bg-sidebar-background border-r border-sidebar-border z-50 animate-in slide-in-from-left">
+            <div className="fixed inset-0 bg-black/50 z-[60]" onClick={() => setMobileOpen(false)} />
+            <div className="fixed inset-y-0 left-0 w-[80vw] max-w-80 bg-background border-r border-border z-[70] animate-in slide-in-from-left shadow-2xl">
               {sidebarContent}
             </div>
           </>
