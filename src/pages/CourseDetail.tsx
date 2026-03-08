@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { getCourseById, getWeeksWithLessons, getUserEnrollment, getUserProgress, getUserCertificate } from "@/lib/supabase-helpers";
 import AppShell from "@/components/AppShell";
 import AiTutorChat from "@/components/AiTutorChat";
+import CourseReviews from "@/components/CourseReviews";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Lock, CheckCircle, Circle, Award, ChevronRight, ArrowLeft } from "lucide-react";
@@ -170,6 +171,9 @@ export default function CourseDetail() {
             </div>
           ))}
         </div>
+
+        {/* Reviews */}
+        {course && <CourseReviews courseId={course.id} hasCompleted={!!certificate} />}
       </div>
       {course && <AiTutorChat courseId={course.id} />}
     </AppShell>

@@ -7,6 +7,7 @@ import AppShell from "@/components/AppShell";
 import CourseSidebar from "@/components/CourseSidebar";
 import AiTutorChat from "@/components/AiTutorChat";
 import LessonNotes from "@/components/LessonNotes";
+import LessonDiscussion from "@/components/LessonDiscussion";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
@@ -139,6 +140,9 @@ export default function Lesson() {
 
               {/* Notes */}
               {id && <LessonNotes lessonId={id} />}
+
+              {/* Discussion */}
+              {id && <LessonDiscussion lessonId={id} />}
 
               {/* Video */}
               {lesson.video_url && (
