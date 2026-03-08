@@ -99,12 +99,35 @@ export default function CourseDetail() {
         )}
 
         {isUnlocked && (
-          <div className="rounded-lg border bg-card p-4 mb-6">
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-sm font-medium">Progress</span>
-              <span className="text-sm text-muted-foreground">{completedLessons}/{totalLessons} lessons</span>
+          <div className="rounded-lg border bg-card p-4 mb-6 space-y-4">
+            {/* Overall */}
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm font-medium">Overall Progress</span>
+                <span className="text-sm text-muted-foreground">{completedLessons}/{totalLessons} lessons · {progressPct}%</span>
+              </div>
+              <Progress value={progressPct} className="h-2" />
             </div>
-            <Progress value={progressPct} className="h-2" />
+            {/* Per-week breakdown */}
+            <div className="space-y-2">
+              {weeks.map((week) => {
+                const weekTotal = week.lessons.length;
+                const weekDone = week.lessons.filter((l: any) => completedIds.has(l.id)).length;
+                const weekPct = weekTotal > 0 ? Math.round((weekDone / weekTotal) * 100) : 0;
+                return (
+                  <div key={week.id} className="flex items-center gap-3">
+                    <span className="text-xs text-muted-foreground w-14 shrink-0">Week {week.week_number}</span>
+                    <div className="flex-1 bg-muted/30 rounded-full h-2 overflow-hidden">
+                      <div
+                        className={`h-full rounded-full transition-all ${weekPct === 100 ? "bg-green-500" : "bg-primary"}`}
+                        style={{ width: `${weekPct}%` }}
+                      />
+                    </div>
+                    <span className="text-xs text-muted-foreground w-12 text-right">{weekDone}/{weekTotal}</span>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )}
 
