@@ -386,8 +386,9 @@ export default function AdminCourseManager({ onCourseCreated, editCourse, open: 
         </div>
       )}
     </DialogContent>
+  );
 
-    {/* Week Improve Dialog */}
+  const weekImproveDialog = (
     <Dialog open={improvingWeekIdx !== null} onOpenChange={(v) => { if (!v) { setImprovingWeekIdx(null); setWeekImproveInstructions(""); } }}>
       <DialogContent className="max-w-md">
         <DialogHeader>
@@ -416,24 +417,29 @@ export default function AdminCourseManager({ onCourseCreated, editCourse, open: 
         </div>
       </DialogContent>
     </Dialog>
-  </>
   );
 
   // If controlled (edit mode), render without trigger
   if (isControlled) {
     return (
-      <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
-        {dialogContent}
-      </Dialog>
+      <>
+        <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
+          {dialogContent}
+        </Dialog>
+        {weekImproveDialog}
+      </>
     );
   }
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
-      <DialogTrigger asChild>
-        <Button><Plus className="h-4 w-4 mr-1" /> Create Course</Button>
-      </DialogTrigger>
-      {dialogContent}
-    </Dialog>
+    <>
+      <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
+        <DialogTrigger asChild>
+          <Button><Plus className="h-4 w-4 mr-1" /> Create Course</Button>
+        </DialogTrigger>
+        {dialogContent}
+      </Dialog>
+      {weekImproveDialog}
+    </>
   );
 }
