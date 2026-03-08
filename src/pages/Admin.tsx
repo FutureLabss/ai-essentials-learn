@@ -300,6 +300,10 @@ export default function Admin() {
             <AdminDiscountTab courses={courses} />
           </TabsContent>
 
+          <TabsContent value="quizzes">
+            <AdminQuizTab courses={courses} />
+          </TabsContent>
+
           <TabsContent value="bulk">
             <AdminBulkTab courses={courses} />
           </TabsContent>

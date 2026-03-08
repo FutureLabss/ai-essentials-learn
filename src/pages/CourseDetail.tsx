@@ -34,18 +34,22 @@ export default function CourseDetail() {
   const loadData = async () => {
     if (!user || !courseId) return;
     try {
-      const [c, w, e, p, cert] = await Promise.all([
+      const [c, w, e, p, cert, { data: qz }, { data: qa }] = await Promise.all([
         getCourseById(courseId),
         getWeeksWithLessons(courseId),
         getUserEnrollment(user.id, courseId),
         getUserProgress(user.id),
         getUserCertificate(user.id, courseId),
+        supabase.from("quizzes").select("*").eq("course_id", courseId).order("created_at"),
+        supabase.from("quiz_attempts").select("*").eq("user_id", user.id),
       ]);
       setCourse(c);
       setWeeks(w);
       setEnrollment(e);
       setProgress(p);
       setCertificate(cert);
+      setQuizzes(qz || []);
+      setQuizAttempts(qa || []);
     } catch (err) {
       console.error(err);
       navigate("/dashboard");
