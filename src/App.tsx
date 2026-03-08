@@ -7,6 +7,8 @@ import { AuthProvider } from "@/hooks/useAuth";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import KYC from "./pages/KYC";
 import Dashboard from "./pages/Dashboard";
 import CourseDetail from "./pages/CourseDetail";
@@ -32,6 +34,8 @@ const App = () => (
             <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/kyc" element={<KYC />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/course/:courseId" element={<CourseDetail />} />
