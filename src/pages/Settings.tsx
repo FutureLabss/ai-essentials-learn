@@ -26,10 +26,21 @@ export default function SettingsPage() {
 
           {/* Profile summary */}
           <div className="rounded-lg border bg-card p-4 mb-6">
-            <h3 className="font-display font-semibold text-sm mb-2">Profile</h3>
-            <div className="text-sm space-y-1">
-              <p><span className="text-muted-foreground">Name:</span> {profile?.first_name} {profile?.last_name}</p>
-              <p><span className="text-muted-foreground">Email:</span> {profile?.email}</p>
+            <h3 className="font-display font-semibold text-sm mb-3">Profile Information</h3>
+            <div className="text-sm grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
+              <p><span className="text-muted-foreground">First Name:</span> {profile?.first_name || "—"}</p>
+              <p><span className="text-muted-foreground">Last Name:</span> {profile?.last_name || "—"}</p>
+              <p><span className="text-muted-foreground">Email:</span> {profile?.email || "—"}</p>
+              <p><span className="text-muted-foreground">Phone:</span> {profile?.phone || "—"}</p>
+              <p><span className="text-muted-foreground">Gender:</span> {profile?.gender || "—"}</p>
+              <p><span className="text-muted-foreground">Date of Birth:</span> {profile?.date_of_birth || "—"}</p>
+              <p><span className="text-muted-foreground">Country:</span> {profile?.country || "—"}</p>
+              <p><span className="text-muted-foreground">State/Region:</span> {profile?.state_region || "—"}</p>
+              <p><span className="text-muted-foreground">City/Town:</span> {profile?.city_town || "—"}</p>
+              <p><span className="text-muted-foreground">Education Level:</span> {profile?.education_level || "—"}</p>
+              <p><span className="text-muted-foreground">Occupation:</span> {profile?.occupation || "—"}</p>
+              <p><span className="text-muted-foreground">Device Used:</span> {profile?.device_used || "—"}</p>
+              <p className="sm:col-span-2"><span className="text-muted-foreground">Reason for Course:</span> {profile?.reason_for_course || "—"}</p>
             </div>
           </div>
 
