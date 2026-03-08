@@ -230,6 +230,7 @@ export default function Admin() {
             <Button size="sm" variant="outline" onClick={exportCSV}>
               <Download className="h-4 w-4 mr-1" /> Export CSV
             </Button>
+            <AiCourseGenerator onCourseCreated={initAdmin} />
             <AdminCourseManager onCourseCreated={initAdmin} />
           </div>
         </div>
