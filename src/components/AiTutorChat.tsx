@@ -228,7 +228,7 @@ export default function AiTutorChat({ courseId }: { courseId?: string }) {
                     <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-sm">
                       <Brain className="h-4.5 w-4.5 text-primary-foreground" />
                     </div>
-                    <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-green-500 border-2 border-card" />
+                    <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-accent-foreground border-2 border-card" />
                   </div>
                   <div>
                     <h3 className="font-display font-bold text-sm tracking-tight">Mr. AI</h3>
