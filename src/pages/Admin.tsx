@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Search, Eye, UserPlus, Unlock, RefreshCw, CheckCircle, Circle, Pencil, Download, ShieldCheck, ShieldOff } from "lucide-react";
 import AdminCourseManager from "@/components/AdminCourseManager";
+import AdminEmailTab from "@/components/AdminEmailTab";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -234,6 +235,7 @@ export default function Admin() {
             <TabsTrigger value="learners">Learners</TabsTrigger>
             <TabsTrigger value="tutors">Tutors</TabsTrigger>
             <TabsTrigger value="courses">Courses</TabsTrigger>
+            <TabsTrigger value="email">Email</TabsTrigger>
           </TabsList>
 
           <TabsContent value="courses">
@@ -317,6 +319,10 @@ export default function Admin() {
                 </div>
               )}
             </div>
+          </TabsContent>
+
+          <TabsContent value="email">
+            <AdminEmailTab courses={courses} />
           </TabsContent>
 
           <TabsContent value="learners">
