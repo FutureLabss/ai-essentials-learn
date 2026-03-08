@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { LogOut, BookOpen, LayoutDashboard, Users } from "lucide-react";
 import SearchBar from "@/components/SearchBar";
+import NotificationBell from "@/components/NotificationBell";
 
 export default function AppShell({ children }: { children: ReactNode }) {
   const { user, role, signOut } = useAuth();
@@ -28,6 +29,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
                 <SearchBar />
               </div>
               <div className="flex items-center gap-1 shrink-0">
+                <NotificationBell />
                 {role === "admin" && (
                   <Button variant="ghost" size="sm" asChild>
                     <Link to="/admin"><Users className="h-4 w-4 sm:mr-1" /><span className="hidden sm:inline">Admin</span></Link>
