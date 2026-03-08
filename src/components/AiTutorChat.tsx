@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { MessageCircle, X, Send, Bot, User, Sparkles } from "lucide-react";
+import { X, Send, User, Sparkles, RotateCcw, Brain } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ReactMarkdown from "react-markdown";
 import { motion, AnimatePresence } from "framer-motion";
@@ -12,10 +12,10 @@ type Msg = { role: "user" | "assistant"; content: string };
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-tutor`;
 
 const SUGGESTED_QUESTIONS = [
-  "What are AI agents and how do they work?",
-  "Explain RAG in simple terms",
-  "What's new in AI this week?",
-  "How do I get started with prompt engineering?",
+  { emoji: "🤖", text: "What are AI agents and how do they work?" },
+  { emoji: "🔍", text: "Explain RAG in simple terms" },
+  { emoji: "📰", text: "What's new in AI this week?" },
+  { emoji: "✍️", text: "How do I get started with prompt engineering?" },
 ];
 
 export default function AiTutorChat({ courseId }: { courseId?: string }) {
@@ -33,7 +33,6 @@ export default function AiTutorChat({ courseId }: { courseId?: string }) {
     }
   }, [messages, open]);
 
-  // Load most recent conversation when opening
   useEffect(() => {
     if (open && user && messages.length === 0) {
       loadRecentConversation();
@@ -65,7 +64,7 @@ export default function AiTutorChat({ courseId }: { courseId?: string }) {
         }
       }
     } catch {
-      // No previous conversation, that's fine
+      // No previous conversation
     }
   };
 
@@ -150,7 +149,6 @@ export default function AiTutorChat({ courseId }: { courseId?: string }) {
         }
       }
 
-      // Save assistant response to DB
       if (user?.id && assistantSoFar) {
         let activeConvoId = conversationId;
         if (!activeConvoId) {
@@ -165,13 +163,11 @@ export default function AiTutorChat({ courseId }: { courseId?: string }) {
           }
         }
         if (activeConvoId) {
-          // Save user message
           await supabase.from("chat_messages").insert({
             conversation_id: activeConvoId,
             role: "user",
             content: text,
           });
-          // Save assistant message
           await supabase.from("chat_messages").insert({
             conversation_id: activeConvoId,
             role: "assistant",
@@ -192,140 +188,183 @@ export default function AiTutorChat({ courseId }: { courseId?: string }) {
 
   return (
     <>
-      {/* FAB */}
+      {/* Floating Action Button */}
       <AnimatePresence>
         {!open && (
           <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            exit={{ scale: 0 }}
+            initial={{ scale: 0, rotate: -180 }}
+            animate={{ scale: 1, rotate: 0 }}
+            exit={{ scale: 0, rotate: 180 }}
+            transition={{ type: "spring", stiffness: 260, damping: 20 }}
             className="fixed bottom-6 right-6 z-50"
           >
-            <Button
+            <button
               onClick={() => setOpen(true)}
-              size="lg"
-              className="h-14 w-14 rounded-full shadow-lg bg-gradient-to-br from-primary to-primary/80"
+              className="group relative h-14 w-14 rounded-2xl bg-gradient-to-br from-primary via-primary to-primary/70 shadow-[0_8px_32px_-4px_hsl(var(--primary)/0.5)] hover:shadow-[0_12px_40px_-4px_hsl(var(--primary)/0.6)] transition-all duration-300 hover:scale-105 active:scale-95 flex items-center justify-center"
             >
-              <Sparkles className="h-6 w-6" />
-            </Button>
+              <Brain className="h-6 w-6 text-primary-foreground transition-transform group-hover:scale-110" />
+              <span className="absolute -top-1 -right-1 h-3.5 w-3.5 rounded-full bg-accent-foreground border-2 border-background animate-pulse" />
+            </button>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Chat Window */}
+      {/* Chat Panel */}
       <AnimatePresence>
         {open && (
           <motion.div
-            initial={{ opacity: 0, y: 40, scale: 0.95 }}
+            initial={{ opacity: 0, y: 60, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 40, scale: 0.95 }}
-            className="fixed bottom-6 right-6 z-50 w-[380px] max-w-[calc(100vw-2rem)] h-[540px] max-h-[calc(100vh-4rem)] rounded-xl border bg-card shadow-2xl flex flex-col overflow-hidden"
+            exit={{ opacity: 0, y: 60, scale: 0.9 }}
+            transition={{ type: "spring", stiffness: 300, damping: 28 }}
+            className="fixed bottom-6 right-6 z-50 w-[400px] max-w-[calc(100vw-2rem)] h-[580px] max-h-[calc(100vh-4rem)] rounded-2xl border border-border/60 bg-card shadow-[0_24px_80px_-12px_rgba(0,0,0,0.25)] flex flex-col overflow-hidden"
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b bg-gradient-to-r from-primary/10 to-primary/5">
-              <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center">
-                  <Sparkles className="h-4 w-4 text-primary" />
+            <div className="relative px-4 py-3 border-b border-border/40">
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/8 via-primary/4 to-transparent" />
+              <div className="relative flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-sm">
+                      <Brain className="h-4.5 w-4.5 text-primary-foreground" />
+                    </div>
+                    <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-green-500 border-2 border-card" />
+                  </div>
+                  <div>
+                    <h3 className="font-display font-bold text-sm tracking-tight">Mr. AI</h3>
+                    <p className="text-[10px] text-muted-foreground leading-tight">Your AI Expert · Online</p>
+                  </div>
                 </div>
-                <div>
-                  <span className="font-display font-bold text-sm">Mr. AI</span>
-                  <p className="text-[10px] text-muted-foreground leading-tight">Your AI Expert · Always Learning</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-1">
-                {messages.length > 0 && (
-                  <Button variant="ghost" size="sm" className="h-7 text-xs px-2" onClick={startNewChat}>
-                    New Chat
+                <div className="flex items-center gap-0.5">
+                  {messages.length > 0 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 text-[11px] px-2 gap-1 text-muted-foreground hover:text-foreground"
+                      onClick={startNewChat}
+                    >
+                      <RotateCcw className="h-3 w-3" /> New
+                    </Button>
+                  )}
+                  <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-foreground" onClick={() => setOpen(false)}>
+                    <X className="h-4 w-4" />
                   </Button>
-                )}
-                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setOpen(false)}>
-                  <X className="h-4 w-4" />
-                </Button>
+                </div>
               </div>
             </div>
 
             {/* Messages */}
-            <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-3 space-y-4">
+            <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
               {messages.length === 0 && (
-                <div className="text-center text-muted-foreground text-sm py-6">
-                  <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
-                    <Sparkles className="h-7 w-7 text-primary/60" />
+                <motion.div
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                  className="text-center py-4"
+                >
+                  <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center mx-auto mb-4 shadow-inner">
+                    <Brain className="h-8 w-8 text-primary/50" />
                   </div>
-                  <p className="font-display font-bold text-foreground">Hey, I'm Mr. AI! 🧠</p>
-                  <p className="text-xs mt-1 max-w-[260px] mx-auto">
-                    Ask me anything about AI — from basics to cutting-edge research like OpenClaw, RAG, agents, and beyond.
+                  <p className="font-display font-bold text-foreground text-base">Hey, I'm Mr. AI! 🧠</p>
+                  <p className="text-xs text-muted-foreground mt-1.5 max-w-[260px] mx-auto leading-relaxed">
+                    Your personal AI tutor. Ask me anything about AI — from basics to cutting-edge research.
                   </p>
-                  <div className="mt-4 space-y-2">
-                    {SUGGESTED_QUESTIONS.map((q) => (
-                      <button
-                        key={q}
-                        onClick={() => send(q)}
-                        className="block w-full text-left text-xs px-3 py-2 rounded-lg border border-border hover:bg-primary/5 hover:border-primary/30 transition-colors"
+                  <div className="mt-5 space-y-2">
+                    {SUGGESTED_QUESTIONS.map((q, i) => (
+                      <motion.button
+                        key={q.text}
+                        initial={{ opacity: 0, x: -12 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.2 + i * 0.08 }}
+                        onClick={() => send(q.text)}
+                        className="group flex items-center gap-2.5 w-full text-left text-xs px-3.5 py-2.5 rounded-xl border border-border/60 hover:border-primary/40 hover:bg-primary/5 transition-all duration-200"
                       >
-                        {q}
-                      </button>
+                        <span className="text-sm">{q.emoji}</span>
+                        <span className="text-muted-foreground group-hover:text-foreground transition-colors">{q.text}</span>
+                      </motion.button>
                     ))}
                   </div>
-                </div>
+                </motion.div>
               )}
+
               {messages.map((msg, i) => (
-                <div key={i} className={`flex gap-2 ${msg.role === "user" ? "justify-end" : ""}`}>
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className={`flex gap-2.5 ${msg.role === "user" ? "justify-end" : ""}`}
+                >
                   {msg.role === "assistant" && (
-                    <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-                      <Sparkles className="h-3.5 w-3.5 text-primary" />
+                    <div className="h-6 w-6 rounded-lg bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center shrink-0 mt-1">
+                      <Brain className="h-3.5 w-3.5 text-primary" />
                     </div>
                   )}
                   <div
-                    className={`rounded-lg px-3 py-2 text-sm max-w-[80%] ${
+                    className={`rounded-2xl px-3.5 py-2.5 text-sm max-w-[80%] ${
                       msg.role === "user"
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted"
+                        ? "bg-primary text-primary-foreground rounded-br-md"
+                        : "bg-muted/50 border border-border/40 rounded-bl-md"
                     }`}
                   >
                     {msg.role === "assistant" ? (
-                      <div className="prose prose-sm max-w-none [&>p]:mb-1 [&>p]:last:mb-0">
+                      <div className="prose prose-sm max-w-none [&>p]:mb-1.5 [&>p]:last:mb-0 [&>p]:leading-relaxed [&>ul]:my-1 [&>ol]:my-1 [&_code]:bg-background/60 [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-xs">
                         <ReactMarkdown>{msg.content}</ReactMarkdown>
                       </div>
                     ) : (
-                      msg.content
+                      <span className="leading-relaxed">{msg.content}</span>
                     )}
                   </div>
                   {msg.role === "user" && (
-                    <div className="h-6 w-6 rounded-full bg-primary flex items-center justify-center shrink-0 mt-0.5">
+                    <div className="h-6 w-6 rounded-lg bg-primary flex items-center justify-center shrink-0 mt-1">
                       <User className="h-3.5 w-3.5 text-primary-foreground" />
                     </div>
                   )}
-                </div>
+                </motion.div>
               ))}
+
               {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
-                <div className="flex gap-2">
-                  <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                    <Sparkles className="h-3.5 w-3.5 text-primary animate-pulse" />
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex gap-2.5"
+                >
+                  <div className="h-6 w-6 rounded-lg bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center shrink-0">
+                    <Brain className="h-3.5 w-3.5 text-primary" />
                   </div>
-                  <div className="bg-muted rounded-lg px-3 py-2 text-sm text-muted-foreground">
-                    Thinking…
+                  <div className="bg-muted/50 border border-border/40 rounded-2xl rounded-bl-md px-4 py-3">
+                    <div className="flex gap-1.5">
+                      <span className="h-2 w-2 rounded-full bg-primary/40 animate-bounce [animation-delay:0ms]" />
+                      <span className="h-2 w-2 rounded-full bg-primary/40 animate-bounce [animation-delay:150ms]" />
+                      <span className="h-2 w-2 rounded-full bg-primary/40 animate-bounce [animation-delay:300ms]" />
+                    </div>
                   </div>
-                </div>
+                </motion.div>
               )}
             </div>
 
             {/* Input */}
-            <div className="border-t px-3 py-2">
+            <div className="border-t border-border/40 px-3 py-2.5 bg-card">
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
                   send();
                 }}
-                className="flex gap-2"
+                className="flex gap-2 items-end"
               >
                 <input
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="Ask Mr. AI anything…"
-                  className="flex-1 text-sm bg-background border rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-primary/30"
+                  className="flex-1 text-sm bg-muted/30 border border-border/50 rounded-xl px-3.5 py-2.5 outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all placeholder:text-muted-foreground/60"
                   disabled={isLoading}
                 />
-                <Button type="submit" size="icon" className="h-9 w-9 shrink-0" disabled={isLoading || !input.trim()}>
+                <Button
+                  type="submit"
+                  size="icon"
+                  className="h-9 w-9 shrink-0 rounded-xl bg-primary hover:bg-primary/90 shadow-sm transition-all active:scale-95"
+                  disabled={isLoading || !input.trim()}
+                >
                   <Send className="h-4 w-4" />
                 </Button>
               </form>
