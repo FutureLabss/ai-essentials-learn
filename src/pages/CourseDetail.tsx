@@ -171,6 +171,9 @@ export default function CourseDetail() {
             </div>
           ))}
         </div>
+
+        {/* Reviews */}
+        {course && <CourseReviews courseId={course.id} hasCompleted={!!certificate} />}
       </div>
       {course && <AiTutorChat courseId={course.id} />}
     </AppShell>
