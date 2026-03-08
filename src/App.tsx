@@ -15,6 +15,7 @@ import Dashboard from "./pages/Dashboard";
 import CourseDetail from "./pages/CourseDetail";
 import CourseLanding from "./pages/CourseLanding";
 import Lesson from "./pages/Lesson";
+import Quiz from "./pages/Quiz";
 import Certificate from "./pages/Certificate";
 import Admin from "./pages/Admin";
 import TutorDashboard from "./pages/TutorDashboard";
@@ -42,6 +43,7 @@ const App = () => (
             <Route path="/course/:courseId" element={<ProtectedRoute><CourseDetail /></ProtectedRoute>} />
             <Route path="/courses/:courseId" element={<CourseLanding />} />
             <Route path="/lesson/:id" element={<ProtectedRoute><Lesson /></ProtectedRoute>} />
+            <Route path="/quiz/:quizId" element={<ProtectedRoute><Quiz /></ProtectedRoute>} />
             <Route path="/certificate" element={<ProtectedRoute><Certificate /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="/tutor" element={<ProtectedRoute requiredRole="tutor"><TutorDashboard /></ProtectedRoute>} />

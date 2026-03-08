@@ -15,6 +15,7 @@ import AdminAnalyticsTab from "@/components/AdminAnalyticsTab";
 import AdminDiscountTab from "@/components/AdminDiscountTab";
 import AdminBulkTab from "@/components/AdminBulkTab";
 import AdminTutorTab from "@/components/AdminTutorTab";
+import AdminQuizTab from "@/components/AdminQuizTab";
 import AiCourseGenerator from "@/components/AiCourseGenerator";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -243,6 +244,7 @@ export default function Admin() {
             <TabsTrigger value="courses">Courses</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="discounts">Discounts</TabsTrigger>
+            <TabsTrigger value="quizzes">Quizzes</TabsTrigger>
             <TabsTrigger value="bulk">Bulk Ops</TabsTrigger>
             <TabsTrigger value="email">Email</TabsTrigger>
           </TabsList>
@@ -296,6 +298,10 @@ export default function Admin() {
 
           <TabsContent value="discounts">
             <AdminDiscountTab courses={courses} />
+          </TabsContent>
+
+          <TabsContent value="quizzes">
+            <AdminQuizTab courses={courses} />
           </TabsContent>
 
           <TabsContent value="bulk">

@@ -2,12 +2,13 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { getCourseById, getWeeksWithLessons, getUserEnrollment, getUserProgress, getUserCertificate } from "@/lib/supabase-helpers";
+import { supabase } from "@/integrations/supabase/client";
 import AppShell from "@/components/AppShell";
 import AiTutorChat from "@/components/AiTutorChat";
 import CourseReviews from "@/components/CourseReviews";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Lock, CheckCircle, Circle, Award, ChevronRight, ArrowLeft } from "lucide-react";
+import { Lock, CheckCircle, Circle, Award, ChevronRight, ArrowLeft, ClipboardList } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function CourseDetail() {
@@ -19,6 +20,8 @@ export default function CourseDetail() {
   const [enrollment, setEnrollment] = useState<any>(null);
   const [progress, setProgress] = useState<any[]>([]);
   const [certificate, setCertificate] = useState<any>(null);
+  const [quizzes, setQuizzes] = useState<any[]>([]);
+  const [quizAttempts, setQuizAttempts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -31,18 +34,22 @@ export default function CourseDetail() {
   const loadData = async () => {
     if (!user || !courseId) return;
     try {
-      const [c, w, e, p, cert] = await Promise.all([
+      const [c, w, e, p, cert, { data: qz }, { data: qa }] = await Promise.all([
         getCourseById(courseId),
         getWeeksWithLessons(courseId),
         getUserEnrollment(user.id, courseId),
         getUserProgress(user.id),
         getUserCertificate(user.id, courseId),
+        supabase.from("quizzes").select("*").eq("course_id", courseId).order("created_at"),
+        supabase.from("quiz_attempts").select("*").eq("user_id", user.id),
       ]);
       setCourse(c);
       setWeeks(w);
       setEnrollment(e);
       setProgress(p);
       setCertificate(cert);
+      setQuizzes(qz || []);
+      setQuizAttempts(qa || []);
     } catch (err) {
       console.error(err);
       navigate("/dashboard");
@@ -133,44 +140,91 @@ export default function CourseDetail() {
         )}
 
         <div className="space-y-4">
-          {weeks.map((week) => (
-            <div key={week.id} className="rounded-lg border bg-card overflow-hidden">
-              <div className="px-4 py-3 bg-secondary/50">
-                <h3 className="font-display font-semibold text-sm">Week {week.week_number}: {week.title}</h3>
-              </div>
-              <div className="divide-y">
-                {week.lessons.map((lesson: any) => {
-                  const globalIdx = allLessons.findIndex((l: any) => l.id === lesson.id);
-                  const isCompleted = completedIds.has(lesson.id);
-                  const isAccessible = isUnlocked;
+          {weeks.map((week) => {
+            const weekQuiz = quizzes.find(q => q.week_id === week.id && q.quiz_type === "weekly");
+            const weekQuizAttempt = weekQuiz ? quizAttempts.find(a => a.quiz_id === weekQuiz.id) : null;
 
-                  return (
+            return (
+              <div key={week.id} className="rounded-lg border bg-card overflow-hidden">
+                <div className="px-4 py-3 bg-secondary/50">
+                  <h3 className="font-display font-semibold text-sm">Week {week.week_number}: {week.title}</h3>
+                </div>
+                <div className="divide-y">
+                  {week.lessons.map((lesson: any) => {
+                    const globalIdx = allLessons.findIndex((l: any) => l.id === lesson.id);
+                    const isCompleted = completedIds.has(lesson.id);
+                    const isAccessible = isUnlocked;
+
+                    return (
+                      <div
+                        key={lesson.id}
+                        className={`flex items-center gap-3 px-4 py-3 ${isAccessible ? "cursor-pointer hover:bg-muted/50" : "opacity-50"}`}
+                        onClick={() => isAccessible && navigate(`/lesson/${lesson.id}`)}
+                      >
+                        {isCompleted ? (
+                          <CheckCircle className="h-5 w-5 text-success shrink-0" />
+                        ) : isAccessible ? (
+                          <Circle className="h-5 w-5 text-primary shrink-0" />
+                        ) : (
+                          <Lock className="h-4 w-4 text-muted-foreground shrink-0" />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">{lesson.title}</p>
+                          {lesson.learning_objective && (
+                            <p className="text-xs text-muted-foreground truncate">{lesson.learning_objective}</p>
+                          )}
+                        </div>
+                        {isAccessible && <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />}
+                      </div>
+                    );
+                  })}
+                  {/* Weekly quiz link */}
+                  {weekQuiz && isUnlocked && (
                     <div
-                      key={lesson.id}
-                      className={`flex items-center gap-3 px-4 py-3 ${isAccessible ? "cursor-pointer hover:bg-muted/50" : "opacity-50"}`}
-                      onClick={() => isAccessible && navigate(`/lesson/${lesson.id}`)}
+                      className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted/50 bg-accent/5"
+                      onClick={() => navigate(`/quiz/${weekQuiz.id}`)}
                     >
-                      {isCompleted ? (
-                        <CheckCircle className="h-5 w-5 text-success shrink-0" />
-                      ) : isAccessible ? (
-                        <Circle className="h-5 w-5 text-primary shrink-0" />
-                      ) : (
-                        <Lock className="h-4 w-4 text-muted-foreground shrink-0" />
-                      )}
+                      <ClipboardList className="h-5 w-5 text-accent shrink-0" />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{lesson.title}</p>
-                        {lesson.learning_objective && (
-                          <p className="text-xs text-muted-foreground truncate">{lesson.learning_objective}</p>
+                        <p className="text-sm font-medium">{weekQuiz.title}</p>
+                        {weekQuizAttempt && (
+                          <p className="text-xs text-muted-foreground">
+                            Best: {weekQuizAttempt.score}% {weekQuizAttempt.passed ? "✓" : ""}
+                          </p>
                         )}
                       </div>
-                      {isAccessible && <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />}
+                      <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
                     </div>
-                  );
-                })}
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
+
+        {/* Final quiz */}
+        {(() => {
+          const finalQuiz = quizzes.find(q => q.quiz_type === "final");
+          const finalAttempt = finalQuiz ? quizAttempts.find(a => a.quiz_id === finalQuiz.id) : null;
+          if (!finalQuiz || !isUnlocked) return null;
+          return (
+            <div
+              className="rounded-lg border bg-accent/10 border-accent/30 p-4 mt-4 flex items-center justify-between cursor-pointer hover:bg-accent/20 transition-colors"
+              onClick={() => navigate(`/quiz/${finalQuiz.id}`)}
+            >
+              <div className="flex items-center gap-3">
+                <ClipboardList className="h-6 w-6 text-accent" />
+                <div>
+                  <p className="font-semibold text-sm">{finalQuiz.title}</p>
+                  {finalAttempt && (
+                    <p className="text-xs text-muted-foreground">Best: {finalAttempt.score}% {finalAttempt.passed ? "✓" : ""}</p>
+                  )}
+                </div>
+              </div>
+              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+            </div>
+          );
+        })()}
 
         {/* Reviews */}
         {course && <CourseReviews courseId={course.id} hasCompleted={!!certificate} />}
