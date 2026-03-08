@@ -1,9 +1,12 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import AppShell from "@/components/AppShell";
 import EmailPreferences from "@/components/EmailPreferences";
+import LanguageSelector from "@/components/LanguageSelector";
+import NotificationReminder from "@/components/NotificationReminder";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -33,6 +36,7 @@ const READ_ONLY_FIELDS = [
 
 export default function SettingsPage() {
   const { user, profile, loading, refreshProfile } = useAuth();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -148,8 +152,8 @@ export default function SettingsPage() {
     <AppShell>
       <div className="container max-w-xl py-6">
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-          <h1 className="font-display text-2xl font-bold mb-1">Settings</h1>
-          <p className="text-muted-foreground text-sm mb-6">Manage your preferences</p>
+          <h1 className="font-display text-2xl font-bold mb-1">{t("settings.title")}</h1>
+          <p className="text-muted-foreground text-sm mb-6">{t("settings.subtitle")}</p>
 
           {/* Avatar section */}
           <div className="flex items-center gap-4 mb-6">
@@ -250,6 +254,8 @@ export default function SettingsPage() {
             </div>
           </div>
 
+          <LanguageSelector />
+          <NotificationReminder />
           <EmailPreferences />
         </motion.div>
       </div>

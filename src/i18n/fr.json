@@ -1,0 +1,71 @@
+{
+  "nav": {
+    "admin": "Admin",
+    "tutor": "Tuteur",
+    "dashboard": "Tableau de bord",
+    "settings": "Paramètres"
+  },
+  "dashboard": {
+    "welcome": "Bon retour, {{name}} 👋",
+    "subtitle": "Choisissez un cours pour continuer",
+    "weeks": "{{count}} Semaines",
+    "completed": "Terminé",
+    "viewCert": "Voir le certificat",
+    "continueLearning": "Continuer",
+    "enroll": "S'inscrire — {{price}}",
+    "processing": "Traitement…",
+    "discountPlaceholder": "Code de réduction",
+    "loading": "Chargement…",
+    "progressTitle": "Votre progression",
+    "lessonsCompleted": "Leçons terminées",
+    "coursesEnrolled": "Cours inscrits",
+    "completionRate": "Taux de complétion",
+    "weeklyActivity": "Activité hebdomadaire",
+    "lessons": "Leçons"
+  },
+  "lesson": {
+    "weekLabel": "Semaine {{week}} · Leçon {{lesson}}",
+    "practicalTask": "📝 Exercice pratique",
+    "markComplete": "Marquer comme terminé",
+    "saving": "Enregistrement…",
+    "completedLabel": "Terminé",
+    "nextLesson": "Leçon suivante",
+    "previous": "← Précédent",
+    "next": "Suivant →"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "subtitle": "Gérez vos préférences",
+    "profileInfo": "Informations du profil",
+    "edit": "Modifier",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
+    "changePhoto": "Changer la photo",
+    "uploading": "Téléchargement…",
+    "language": "Langue",
+    "languageDesc": "Choisissez votre langue préférée"
+  },
+  "auth": {
+    "login": "Connexion",
+    "signup": "Inscription",
+    "forgotPassword": "Mot de passe oublié ?",
+    "checkInbox": "Vérifiez votre boîte mail",
+    "verifyEmail": "Nous avons envoyé un lien de vérification à votre adresse e-mail."
+  },
+  "install": {
+    "title": "Installer AI Essentials",
+    "subtitle": "Ajoutez à votre écran d'accueil"
+  },
+  "offline": {
+    "available": "Contenu disponible hors ligne",
+    "cached": "Leçons mises en cache pour lecture hors ligne"
+  },
+  "notifications": {
+    "reminderTitle": "Continuez à apprendre !",
+    "reminderBody": "Vous avez des leçons incomplètes.",
+    "enable": "Activer les rappels",
+    "disable": "Désactiver les rappels",
+    "permissionDenied": "Permission de notification refusée"
+  }
+}

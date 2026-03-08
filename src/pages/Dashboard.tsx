@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
-import { getAllCourses, getUserEnrollments, getUserProgress, getUserCertificate, COURSE_PRICES, formatNaira } from "@/lib/supabase-helpers";
+import { getAllCourses, getUserEnrollments, getUserProgress, getUserCertificate, getWeeksWithLessons, COURSE_PRICES, formatNaira } from "@/lib/supabase-helpers";
 import AppShell from "@/components/AppShell";
+import ProgressAnalytics from "@/components/ProgressAnalytics";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { BookOpen, Lock, Award, ArrowRight, Clock, Tag } from "lucide-react";
@@ -13,10 +15,12 @@ import { supabase } from "@/integrations/supabase/client";
 export default function Dashboard() {
   const { user, profile, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [courses, setCourses] = useState<any[]>([]);
   const [enrollments, setEnrollments] = useState<any[]>([]);
   const [progress, setProgress] = useState<any[]>([]);
   const [certificates, setCertificates] = useState<any[]>([]);
+  const [allWeeks, setAllWeeks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [payingCourse, setPayingCourse] = useState<string | null>(null);
   const [discountCodes, setDiscountCodes] = useState<Record<string, string>>({});
@@ -44,6 +48,11 @@ export default function Dashboard() {
         c.map(course => getUserCertificate(user.id, course.id))
       );
       setCertificates(certs.filter(Boolean));
+
+      // Load weeks for analytics
+      const weeksPromises = e.map(en => getWeeksWithLessons(en.course_id));
+      const weeksResults = await Promise.all(weeksPromises);
+      setAllWeeks(weeksResults.flat());
     } catch (err) {
       console.error(err);
     }
@@ -136,7 +145,7 @@ export default function Dashboard() {
   const getCert = (courseId: string) => certificates.find((c: any) => c?.course_id === courseId);
 
   if (authLoading || loading) {
-    return <AppShell><div className="container py-12 text-center text-muted-foreground">Loading…</div></AppShell>;
+    return <AppShell><div className="container py-12 text-center text-muted-foreground">{t("dashboard.loading")}</div></AppShell>;
   }
 
   return (
@@ -145,10 +154,20 @@ export default function Dashboard() {
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
           <h1 className="font-display text-2xl font-bold mb-1">
-            Welcome back, {profile?.first_name || "Learner"} 👋
+            {t("dashboard.welcome", { name: profile?.first_name || "Learner" })}
           </h1>
-          <p className="text-muted-foreground text-sm">Choose a course to continue learning</p>
+          <p className="text-muted-foreground text-sm">{t("dashboard.subtitle")}</p>
         </motion.div>
+
+        {/* Progress Analytics */}
+        {enrollments.length > 0 && (
+          <ProgressAnalytics
+            progress={progress}
+            enrollments={enrollments}
+            courses={courses}
+            weeks={allWeeks}
+          />
+        )}
 
         {/* Course Grid */}
         <div className="grid gap-6 sm:grid-cols-2">

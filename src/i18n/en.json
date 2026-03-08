@@ -1,0 +1,71 @@
+{
+  "nav": {
+    "admin": "Admin",
+    "tutor": "Tutor",
+    "dashboard": "Dashboard",
+    "settings": "Settings"
+  },
+  "dashboard": {
+    "welcome": "Welcome back, {{name}} 👋",
+    "subtitle": "Choose a course to continue learning",
+    "weeks": "{{count}} Weeks",
+    "completed": "Completed",
+    "viewCert": "View Certificate",
+    "continueLearning": "Continue Learning",
+    "enroll": "Enroll — {{price}}",
+    "processing": "Processing…",
+    "discountPlaceholder": "Discount code",
+    "loading": "Loading…",
+    "progressTitle": "Your Learning Progress",
+    "lessonsCompleted": "Lessons Completed",
+    "coursesEnrolled": "Courses Enrolled",
+    "completionRate": "Completion Rate",
+    "weeklyActivity": "Weekly Activity",
+    "lessons": "Lessons"
+  },
+  "lesson": {
+    "weekLabel": "Week {{week}} · Lesson {{lesson}}",
+    "practicalTask": "📝 Practical Task",
+    "markComplete": "Mark as Complete",
+    "saving": "Saving…",
+    "completedLabel": "Completed",
+    "nextLesson": "Next Lesson",
+    "previous": "← Previous",
+    "next": "Next →"
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Manage your preferences",
+    "profileInfo": "Profile Information",
+    "edit": "Edit",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saving": "Saving…",
+    "changePhoto": "Change photo",
+    "uploading": "Uploading…",
+    "language": "Language",
+    "languageDesc": "Choose your preferred language"
+  },
+  "auth": {
+    "login": "Log In",
+    "signup": "Sign Up",
+    "forgotPassword": "Forgot Password?",
+    "checkInbox": "Check your inbox",
+    "verifyEmail": "We sent a verification link to your email. Please verify before logging in."
+  },
+  "install": {
+    "title": "Install AI Essentials",
+    "subtitle": "Add to your home screen for the best experience"
+  },
+  "offline": {
+    "available": "Content available offline",
+    "cached": "Lessons cached for offline reading"
+  },
+  "notifications": {
+    "reminderTitle": "Continue Learning!",
+    "reminderBody": "You have incomplete lessons waiting for you.",
+    "enable": "Enable Reminders",
+    "disable": "Disable Reminders",
+    "permissionDenied": "Notification permission denied"
+  }
+}
