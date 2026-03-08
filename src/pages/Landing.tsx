@@ -2,8 +2,9 @@ import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { BookOpen, CheckCircle, Zap, Award, ArrowRight } from "lucide-react";
-import { motion } from "framer-motion";
+import { Skeleton } from "@/components/ui/skeleton";
+import { BookOpen, CheckCircle, Zap, Award, ArrowRight, Menu, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Course {
   id: string;
@@ -29,6 +30,9 @@ const fadeUp = {
 
 export default function Landing() {
   const [courses, setCourses] = useState<Course[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     supabase
@@ -36,8 +40,10 @@ export default function Landing() {
       .select("id, name, description, duration_weeks")
       .eq("is_hidden", false)
       .order("created_at")
-      .then(({ data }) => {
+      .then(({ data, error: err }) => {
+        if (err) setError("Failed to load courses");
         if (data) setCourses(data);
+        setLoading(false);
       });
   }, []);
 
@@ -50,7 +56,9 @@ export default function Landing() {
             <BookOpen className="h-5 w-5" />
             <span>FutureLabs</span>
           </div>
-          <div className="flex gap-2">
+
+          {/* Desktop nav */}
+          <div className="hidden sm:flex gap-2">
             <Button variant="ghost" size="sm" asChild>
               <Link to="/login">Log in</Link>
             </Button>
@@ -58,7 +66,38 @@ export default function Landing() {
               <Link to="/signup">Get Started</Link>
             </Button>
           </div>
+
+          {/* Mobile hamburger */}
+          <button
+            className="sm:hidden p-2 rounded-md hover:bg-muted/50 transition-colors"
+            onClick={() => setMenuOpen(!menuOpen)}
+            aria-label="Toggle menu"
+          >
+            {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
         </div>
+
+        {/* Mobile dropdown */}
+        <AnimatePresence>
+          {menuOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="sm:hidden overflow-hidden border-t bg-card"
+            >
+              <div className="container py-3 flex flex-col gap-2">
+                <Button variant="ghost" size="sm" asChild className="justify-start" onClick={() => setMenuOpen(false)}>
+                  <Link to="/login">Log in</Link>
+                </Button>
+                <Button size="sm" asChild onClick={() => setMenuOpen(false)}>
+                  <Link to="/signup">Get Started</Link>
+                </Button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </header>
 
       {/* Hero */}
@@ -94,10 +133,41 @@ export default function Landing() {
       </section>
 
       {/* Courses */}
-      {courses.length > 0 && (
-        <section className="container pb-16 md:pb-24">
-          <div className="max-w-2xl mx-auto">
-            <h2 className="font-display text-2xl font-bold text-center mb-8">Our Courses</h2>
+      <section className="container pb-16 md:pb-24">
+        <div className="max-w-2xl mx-auto">
+          <h2 className="font-display text-2xl font-bold text-center mb-8">Our Courses</h2>
+
+          {loading && (
+            <div className="grid grid-cols-1 gap-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="rounded-lg border bg-card p-5">
+                  <Skeleton className="h-5 w-2/3 mb-2" />
+                  <Skeleton className="h-4 w-full mb-2" />
+                  <Skeleton className="h-4 w-16" />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {error && !loading && (
+            <div className="rounded-lg border border-destructive/50 bg-destructive/5 p-5 text-center">
+              <p className="text-sm text-destructive">{error}</p>
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-3"
+                onClick={() => window.location.reload()}
+              >
+                Try again
+              </Button>
+            </div>
+          )}
+
+          {!loading && !error && courses.length === 0 && (
+            <p className="text-center text-sm text-muted-foreground">No courses available yet. Check back soon!</p>
+          )}
+
+          {!loading && !error && courses.length > 0 && (
             <div className="grid grid-cols-1 gap-4">
               {courses.map((course, i) => (
                 <motion.div
@@ -128,9 +198,9 @@ export default function Landing() {
                 </motion.div>
               ))}
             </div>
-          </div>
-        </section>
-      )}
+          )}
+        </div>
+      </section>
 
       {/* Features */}
       <section className="container pb-16 md:pb-24">
