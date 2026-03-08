@@ -15,10 +15,12 @@ import { supabase } from "@/integrations/supabase/client";
 export default function Dashboard() {
   const { user, profile, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [courses, setCourses] = useState<any[]>([]);
   const [enrollments, setEnrollments] = useState<any[]>([]);
   const [progress, setProgress] = useState<any[]>([]);
   const [certificates, setCertificates] = useState<any[]>([]);
+  const [allWeeks, setAllWeeks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [payingCourse, setPayingCourse] = useState<string | null>(null);
   const [discountCodes, setDiscountCodes] = useState<Record<string, string>>({});
