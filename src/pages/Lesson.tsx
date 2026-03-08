@@ -8,6 +8,7 @@ import CourseSidebar from "@/components/CourseSidebar";
 import AiTutorChat from "@/components/AiTutorChat";
 import LessonNotes from "@/components/LessonNotes";
 import LessonDiscussion from "@/components/LessonDiscussion";
+import AssignmentSubmission from "@/components/AssignmentSubmission";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
