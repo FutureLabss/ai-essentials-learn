@@ -386,6 +386,37 @@ export default function AdminCourseManager({ onCourseCreated, editCourse, open: 
         </div>
       )}
     </DialogContent>
+
+    {/* Week Improve Dialog */}
+    <Dialog open={improvingWeekIdx !== null} onOpenChange={(v) => { if (!v) { setImprovingWeekIdx(null); setWeekImproveInstructions(""); } }}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-primary" />
+            AI Improve Week {improvingWeekIdx !== null ? improvingWeekIdx + 1 : ""}
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-3">
+          <p className="text-sm text-muted-foreground">
+            AI will enhance this week's lessons, learning objectives, and practical tasks.
+          </p>
+          <Textarea
+            placeholder="Optional: specific instructions (e.g. 'add more examples', 'make it beginner-friendly')"
+            value={weekImproveInstructions}
+            onChange={e => setWeekImproveInstructions(e.target.value)}
+            rows={3}
+          />
+          <Button
+            className="w-full"
+            onClick={() => improvingWeekIdx !== null && handleImproveWeek(improvingWeekIdx)}
+            disabled={weekImproving}
+          >
+            {weekImproving ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Improving…</> : <><Sparkles className="h-4 w-4 mr-2" /> Improve Week</>}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  </>
   );
 
   // If controlled (edit mode), render without trigger
