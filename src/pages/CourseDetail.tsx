@@ -20,6 +20,8 @@ export default function CourseDetail() {
   const [enrollment, setEnrollment] = useState<any>(null);
   const [progress, setProgress] = useState<any[]>([]);
   const [certificate, setCertificate] = useState<any>(null);
+  const [quizzes, setQuizzes] = useState<any[]>([]);
+  const [quizAttempts, setQuizAttempts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
