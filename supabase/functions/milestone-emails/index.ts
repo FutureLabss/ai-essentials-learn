@@ -260,7 +260,7 @@ function welcomeHtml(name: string, courseName: string) {
     <p style="color: #444; font-size: 16px; line-height: 1.6;">
       Head over to your dashboard to start your first lesson. Remember — consistency is key, and even 15 minutes a day can make a big difference.
     </p>
-    <a href="https://ai-essentials-learn.lovable.app/dashboard" style="display: inline-block; background: #6366f1; color: #fff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; margin-top: 16px;">Start Learning →</a>
+    <a href="https://ai.futurelabs.ng/dashboard" style="display: inline-block; background: #6366f1; color: #fff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; margin-top: 16px;">Start Learning →</a>
     <p style="color: #999; font-size: 13px; margin-top: 32px;">— The AI Essentials Team at FutureLabs</p>
   </div>`;
 }
@@ -275,7 +275,7 @@ function weekCompletedHtml(name: string, courseName: string, weekNum: number, we
     <p style="color: #444; font-size: 16px; line-height: 1.6;">
       Keep the momentum going — your next week of lessons is waiting for you!
     </p>
-    <a href="https://ai-essentials-learn.lovable.app/dashboard" style="display: inline-block; background: #6366f1; color: #fff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; margin-top: 16px;">Continue Learning →</a>
+    <a href="https://ai.futurelabs.ng/dashboard" style="display: inline-block; background: #6366f1; color: #fff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; margin-top: 16px;">Continue Learning →</a>
     <p style="color: #999; font-size: 13px; margin-top: 32px;">— The AI Essentials Team at FutureLabs</p>
   </div>`;
 }
@@ -290,7 +290,7 @@ function courseCompletedHtml(name: string, courseName: string) {
     <p style="color: #444; font-size: 16px; line-height: 1.6;">
       Your certificate is ready — head to your dashboard to download it and share your accomplishment!
     </p>
-    <a href="https://ai-essentials-learn.lovable.app/dashboard" style="display: inline-block; background: #6366f1; color: #fff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; margin-top: 16px;">Get Your Certificate →</a>
+    <a href="https://ai.futurelabs.ng/dashboard" style="display: inline-block; background: #6366f1; color: #fff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; margin-top: 16px;">Get Your Certificate →</a>
     <p style="color: #999; font-size: 13px; margin-top: 32px;">— The AI Essentials Team at FutureLabs</p>
   </div>`;
 }
@@ -305,7 +305,7 @@ function inactivityHtml(name: string, courseName: string) {
     <p style="color: #444; font-size: 16px; line-height: 1.6;">
       Even a quick 10-minute session can keep your learning streak alive. Jump back in today!
     </p>
-    <a href="https://ai-essentials-learn.lovable.app/dashboard" style="display: inline-block; background: #6366f1; color: #fff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; margin-top: 16px;">Resume Learning →</a>
+    <a href="https://ai.futurelabs.ng/dashboard" style="display: inline-block; background: #6366f1; color: #fff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; margin-top: 16px;">Resume Learning →</a>
     <p style="color: #999; font-size: 13px; margin-top: 32px;">— The AI Essentials Team at FutureLabs</p>
   </div>`;
 }
