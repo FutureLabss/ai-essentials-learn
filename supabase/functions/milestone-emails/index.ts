@@ -305,7 +305,7 @@ function inactivityHtml(name: string, courseName: string) {
     <p style="color: #444; font-size: 16px; line-height: 1.6;">
       Even a quick 10-minute session can keep your learning streak alive. Jump back in today!
     </p>
-    <a href="https://ai-essentials-learn.lovable.app/dashboard" style="display: inline-block; background: #6366f1; color: #fff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; margin-top: 16px;">Resume Learning →</a>
+    <a href="https://ai.futurelabs.ng/dashboard" style="display: inline-block; background: #6366f1; color: #fff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; margin-top: 16px;">Resume Learning →</a>
     <p style="color: #999; font-size: 13px; margin-top: 32px;">— The AI Essentials Team at FutureLabs</p>
   </div>`;
 }
