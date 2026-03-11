@@ -137,15 +137,22 @@ Deno.serve(async (req) => {
       }
     }
 
-    // --- 4. Inactivity reminder (3+ days) ---
+    // --- 4. Inactivity reminder (3+ days inactive, sent once every 3 weeks) ---
     const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString();
-    const today = new Date().toISOString().split("T")[0];
+    const threeWeeksAgo = new Date(Date.now() - 21 * 24 * 60 * 60 * 1000).toISOString();
 
     if (enrollments) {
       for (const enrollment of enrollments) {
-        const refId = `inactivity_${today}`;
-        const alreadySent = await checkSent(supabase, enrollment.user_id, "inactivity_reminder", refId);
-        if (alreadySent) continue;
+        // Check if an inactivity reminder was already sent in the last 3 weeks
+        const { data: recentReminder } = await supabase
+          .from("email_logs")
+          .select("sent_at")
+          .eq("user_id", enrollment.user_id)
+          .eq("milestone_type", "inactivity_reminder")
+          .gte("sent_at", threeWeeksAgo)
+          .limit(1);
+
+        if (recentReminder && recentReminder.length > 0) continue;
 
         // Check last activity
         const { data: recentProgress } = await supabase
@@ -172,6 +179,7 @@ Deno.serve(async (req) => {
         const course = await getCourse(supabase, enrollment.course_id);
         if (!profile || !course) continue;
 
+        const refId = `inactivity_${new Date().toISOString().split("T")[0]}`;
         const sent = await sendEmail(RESEND_API_KEY, profile.email, `We miss you! Continue ${course.name} 📚`, inactivityHtml(profile.first_name || "Learner", course.name));
         if (sent) {
           await logSent(supabase, enrollment.user_id, "inactivity_reminder", refId);
