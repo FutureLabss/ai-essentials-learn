@@ -64,7 +64,7 @@ export default function Dashboard() {
     setPayingCourse(courseId);
 
     try {
-      const amount = COURSE_PRICES[courseId] || 20000;
+      const amount = COURSE_PRICES[courseId] || 25000;
       const callbackUrl = `${window.location.origin}/dashboard?verify=${courseId}`;
       const discountCode = discountCodes[courseId]?.trim() || undefined;
 
@@ -175,7 +175,7 @@ export default function Dashboard() {
             const enrollment = getEnrollment(course.id);
             const cert = getCert(course.id);
             const isUnlocked = enrollment?.is_unlocked;
-            const price = COURSE_PRICES[course.id] || 20000;
+            const price = COURSE_PRICES[course.id] || 25000;
 
             return (
               <motion.div

@@ -36,7 +36,7 @@ export default function CourseLanding() {
   };
 
   const totalLessons = weeks.reduce((sum, w) => sum + w.lessons.length, 0);
-  const price = courseId ? COURSE_PRICES[courseId] || 20000 : 20000;
+  const price = courseId ? COURSE_PRICES[courseId] || 25000 : 25000;
 
   if (loading) {
     return (

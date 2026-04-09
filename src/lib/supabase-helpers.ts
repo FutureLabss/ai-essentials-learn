@@ -131,8 +131,8 @@ export async function getUserCertificate(userId: string, courseId: string) {
 
 // Course pricing map (NGN)
 export const COURSE_PRICES: Record<string, number> = {
-  "a1b2c3d4-e5f6-7890-abcd-ef1234567890": 49990, // AI Essentials — ₦49,990
-  "b2c3d4e5-f6a7-8901-bcde-f12345678901": 20000, // Digital Essentials — ₦20,000
+  "a1b2c3d4-e5f6-7890-abcd-ef1234567890": 25000, // AI Essentials — ₦25,000
+  "b2c3d4e5-f6a7-8901-bcde-f12345678901": 25000, // Digital Essentials — ₦25,000
 };
 
 export function formatNaira(amount: number): string {
