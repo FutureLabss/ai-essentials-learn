@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { markLessonComplete, getUserProgress, getWeeksWithLessons, getCourseById, getUserEnrollment } from "@/lib/supabase-helpers";
+import { getUnlockedWeekIds } from "@/lib/progression-helpers";
 import AppShell from "@/components/AppShell";
 import CourseSidebar from "@/components/CourseSidebar";
 import AiTutorChat from "@/components/AiTutorChat";
@@ -27,6 +28,7 @@ export default function Lesson() {
   const [allLessons, setAllLessons] = useState<any[]>([]);
   const [progress, setProgress] = useState<any[]>([]);
   const [marking, setMarking] = useState(false);
+  const [unlockedWeekIds, setUnlockedWeekIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (!user || !id) return;
@@ -59,13 +61,25 @@ export default function Lesson() {
     const ordered = weeksData.flatMap(w => w.lessons);
     setAllLessons(ordered);
 
-    const [p, enr] = await Promise.all([
+    const [p, enr, { data: quizzes }, { data: quizAttempts }] = await Promise.all([
       getUserProgress(user.id),
       getUserEnrollment(user.id, courseData.id),
+      supabase.from("quizzes").select("*").eq("course_id", courseData.id).order("created_at"),
+      supabase.from("quiz_attempts").select("*").eq("user_id", user.id),
     ]);
+
     setProgress(p);
     setEnrollment(enr);
     setIsCompleted(p.some(pr => pr.lesson_id === id && pr.completed));
+
+    const unlocked = getUnlockedWeekIds(weeksData, quizzes || [], quizAttempts || []);
+    setUnlockedWeekIds(unlocked);
+
+    if (enr?.is_unlocked && !unlocked.has(weekData.id)) {
+      toast.error("You must pass the previous module's quiz before accessing this lesson.");
+      navigate(`/course/${courseData.id}`);
+      return;
+    }
   };
 
   const handleMarkComplete = async () => {
@@ -110,6 +124,7 @@ export default function Lesson() {
             currentLessonId={id || ""}
             isUnlocked={enrollment?.is_unlocked ?? false}
             courseName={course.name}
+            unlockedWeekIds={unlockedWeekIds}
           />
         )}
 

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { getCourseById, getWeeksWithLessons, getUserEnrollment, getUserProgress, getUserCertificate } from "@/lib/supabase-helpers";
+import { getUnlockedWeekIds } from "@/lib/progression-helpers";
 import { supabase } from "@/integrations/supabase/client";
 import AppShell from "@/components/AppShell";
 import AiTutorChat from "@/components/AiTutorChat";
@@ -61,6 +62,7 @@ export default function CourseDetail() {
   const completedLessons = progress.filter(p => p.completed).length;
   const progressPct = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
   const isUnlocked = enrollment?.is_unlocked;
+  const unlockedWeekIds = getUnlockedWeekIds(weeks, quizzes, quizAttempts);
 
   const allLessons = weeks.flatMap(w => w.lessons.map((l: any) => ({ ...l, weekTitle: w.title, weekNumber: w.week_number })));
   const completedIds = new Set(progress.filter(p => p.completed).map(p => p.lesson_id));
@@ -153,7 +155,7 @@ export default function CourseDetail() {
                   {week.lessons.map((lesson: any) => {
                     const globalIdx = allLessons.findIndex((l: any) => l.id === lesson.id);
                     const isCompleted = completedIds.has(lesson.id);
-                    const isAccessible = isUnlocked;
+                    const isAccessible = isUnlocked && unlockedWeekIds.has(week.id);
 
                     return (
                       <div
@@ -179,7 +181,7 @@ export default function CourseDetail() {
                     );
                   })}
                   {/* Weekly quiz link */}
-                  {weekQuiz && isUnlocked && (
+                  {weekQuiz && isUnlocked && unlockedWeekIds.has(week.id) && (
                     <div
                       className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted/50 bg-accent/5"
                       onClick={() => navigate(`/quiz/${weekQuiz.id}`)}
@@ -206,7 +208,8 @@ export default function CourseDetail() {
         {(() => {
           const finalQuiz = quizzes.find(q => q.quiz_type === "final");
           const finalAttempt = finalQuiz ? quizAttempts.find(a => a.quiz_id === finalQuiz.id) : null;
-          if (!finalQuiz || !isUnlocked) return null;
+          const finalWeekId = weeks.length > 0 ? weeks[weeks.length - 1].id : null;
+          if (!finalQuiz || !isUnlocked || !unlockedWeekIds.has(finalWeekId)) return null;
           return (
             <div
               className="rounded-lg border bg-accent/10 border-accent/30 p-4 mt-4 flex items-center justify-between cursor-pointer hover:bg-accent/20 transition-colors"

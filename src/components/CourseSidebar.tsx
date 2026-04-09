@@ -13,9 +13,10 @@ interface CourseSidebarProps {
   currentLessonId: string;
   isUnlocked: boolean;
   courseName: string;
+  unlockedWeekIds: Set<string>;
 }
 
-export default function CourseSidebar({ weeks, progress, currentLessonId, isUnlocked, courseName }: CourseSidebarProps) {
+export default function CourseSidebar({ weeks, progress, currentLessonId, isUnlocked, courseName, unlockedWeekIds }: CourseSidebarProps) {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -88,7 +89,7 @@ export default function CourseSidebar({ weeks, progress, currentLessonId, isUnlo
                     {week.lessons.map((lesson: any) => {
                       const globalIdx = allLessons.findIndex((l: any) => l.id === lesson.id);
                       const isCompleted = completedIds.has(lesson.id);
-                      const isAccessible = isUnlocked;
+                      const isAccessible = isUnlocked && unlockedWeekIds.has(week.id);
                       const isCurrent = lesson.id === currentLessonId;
 
                       return (
