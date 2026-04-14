@@ -464,7 +464,9 @@ export type Database = {
           id: string
           learning_objective: string | null
           lesson_number: number
+          pdf_url: string | null
           practical_task: string | null
+          slide_url: string | null
           title: string
           video_url: string | null
           week_id: string
@@ -474,7 +476,9 @@ export type Database = {
           id?: string
           learning_objective?: string | null
           lesson_number: number
+          pdf_url?: string | null
           practical_task?: string | null
+          slide_url?: string | null
           title: string
           video_url?: string | null
           week_id: string
@@ -484,7 +488,9 @@ export type Database = {
           id?: string
           learning_objective?: string | null
           lesson_number?: number
+          pdf_url?: string | null
           practical_task?: string | null
+          slide_url?: string | null
           title?: string
           video_url?: string | null
           week_id?: string

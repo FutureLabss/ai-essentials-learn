@@ -170,6 +170,7 @@ export default function Lesson() {
               {/* Video */}
               {lesson.video_url && (
                 <div className="mb-8">
+                  <h3 className="font-display font-semibold text-sm mb-2">🎬 Video</h3>
                   {lesson.video_url.includes("youtube.com") || lesson.video_url.includes("youtu.be") ? (
                     <div className="aspect-video rounded-lg overflow-hidden border">
                       <iframe
@@ -185,6 +186,44 @@ export default function Lesson() {
                       Watch Video Resource →
                     </a>
                   )}
+                </div>
+              )}
+
+              {/* Slides */}
+              {lesson.slide_url && (
+                <div className="mb-8">
+                  <h3 className="font-display font-semibold text-sm mb-2">📊 Slides</h3>
+                  {lesson.slide_url.includes("docs.google.com") || lesson.slide_url.includes("onedrive") || lesson.slide_url.includes("slideshare") ? (
+                    <div className="aspect-video rounded-lg overflow-hidden border">
+                      <iframe
+                        src={lesson.slide_url.includes("docs.google.com") ? lesson.slide_url.replace("/pub", "/embed") : lesson.slide_url}
+                        title={`${lesson.title} - Slides`}
+                        allowFullScreen
+                        className="w-full h-full"
+                      />
+                    </div>
+                  ) : (
+                    <a href={lesson.slide_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-primary underline text-sm">
+                      View Slides →
+                    </a>
+                  )}
+                </div>
+              )}
+
+              {/* PDF */}
+              {lesson.pdf_url && (
+                <div className="mb-8">
+                  <h3 className="font-display font-semibold text-sm mb-2">📄 PDF Resource</h3>
+                  <div className="rounded-lg overflow-hidden border" style={{ height: "600px" }}>
+                    <iframe
+                      src={lesson.pdf_url}
+                      title={`${lesson.title} - PDF`}
+                      className="w-full h-full"
+                    />
+                  </div>
+                  <a href={lesson.pdf_url} target="_blank" rel="noopener noreferrer" className="text-primary underline text-xs mt-2 inline-block">
+                    Open PDF in new tab →
+                  </a>
                 </div>
               )}
 
