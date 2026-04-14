@@ -15,6 +15,8 @@ interface LessonDraft {
   title: string;
   content: string;
   video_url: string;
+  slide_url: string;
+  pdf_url: string;
   learning_objective: string;
   practical_task: string;
 }
@@ -30,6 +32,8 @@ const emptyLesson = (): LessonDraft => ({
   title: "",
   content: "",
   video_url: "",
+  slide_url: "",
+  pdf_url: "",
   learning_objective: "",
   practical_task: "",
 });
@@ -97,6 +101,8 @@ export default function AdminCourseManager({ onCourseCreated, editCourse, open: 
             title: l.title?.trim() || `Lesson ${li + 1}`,
             content: l.content?.trim() || "",
             video_url: w.lessons[li]?.video_url || "",
+            slide_url: w.lessons[li]?.slide_url || "",
+            pdf_url: w.lessons[li]?.pdf_url || "",
             learning_objective: l.learning_objective?.trim() || "",
             practical_task: l.practical_task?.trim() || "",
           })),
@@ -139,6 +145,8 @@ export default function AdminCourseManager({ onCourseCreated, editCourse, open: 
             title: l.title,
             content: l.content,
             video_url: l.video_url || "",
+            slide_url: l.slide_url || "",
+            pdf_url: l.pdf_url || "",
             learning_objective: l.learning_objective || "",
             practical_task: l.practical_task || "",
           })),
@@ -223,6 +231,8 @@ export default function AdminCourseManager({ onCourseCreated, editCourse, open: 
         title: l.title.trim(),
         content: l.content.trim(),
         video_url: l.video_url.trim() || null,
+        slide_url: l.slide_url.trim() || null,
+        pdf_url: l.pdf_url.trim() || null,
         learning_objective: l.learning_objective.trim() || null,
         practical_task: l.practical_task.trim() || null,
       }))
@@ -272,6 +282,8 @@ export default function AdminCourseManager({ onCourseCreated, editCourse, open: 
         title: l.title.trim(),
         content: l.content.trim(),
         video_url: l.video_url.trim() || null,
+        slide_url: l.slide_url.trim() || null,
+        pdf_url: l.pdf_url.trim() || null,
         learning_objective: l.learning_objective.trim() || null,
         practical_task: l.practical_task.trim() || null,
       }))
@@ -366,6 +378,8 @@ export default function AdminCourseManager({ onCourseCreated, editCourse, open: 
                           <Input placeholder="Lesson title *" value={lesson.title} onChange={e => updateLesson(wi, li, "title", e.target.value)} />
                           <Textarea placeholder="Lesson content *" value={lesson.content} onChange={e => updateLesson(wi, li, "content", e.target.value)} rows={3} />
                           <Input placeholder="YouTube URL (optional)" value={lesson.video_url} onChange={e => updateLesson(wi, li, "video_url", e.target.value)} />
+                          <Input placeholder="Slide URL - Google Slides embed link (optional)" value={lesson.slide_url} onChange={e => updateLesson(wi, li, "slide_url", e.target.value)} />
+                          <Input placeholder="PDF URL (optional)" value={lesson.pdf_url} onChange={e => updateLesson(wi, li, "pdf_url", e.target.value)} />
                           <Input placeholder="Learning objective (optional)" value={lesson.learning_objective} onChange={e => updateLesson(wi, li, "learning_objective", e.target.value)} />
                           <Input placeholder="Practical task (optional)" value={lesson.practical_task} onChange={e => updateLesson(wi, li, "practical_task", e.target.value)} />
                         </div>
