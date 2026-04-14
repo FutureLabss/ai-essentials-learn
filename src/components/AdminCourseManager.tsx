@@ -101,6 +101,8 @@ export default function AdminCourseManager({ onCourseCreated, editCourse, open: 
             title: l.title?.trim() || `Lesson ${li + 1}`,
             content: l.content?.trim() || "",
             video_url: w.lessons[li]?.video_url || "",
+            slide_url: w.lessons[li]?.slide_url || "",
+            pdf_url: w.lessons[li]?.pdf_url || "",
             learning_objective: l.learning_objective?.trim() || "",
             practical_task: l.practical_task?.trim() || "",
           })),
