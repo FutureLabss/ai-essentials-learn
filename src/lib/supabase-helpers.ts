@@ -19,10 +19,13 @@ export async function getUserRole(userId: string): Promise<string | null> {
   const { data, error } = await supabase
     .from("user_roles")
     .select("role")
-    .eq("user_id", userId)
-    .maybeSingle();
+    .eq("user_id", userId);
   if (error) throw error;
-  return data?.role || null;
+  if (!data || data.length === 0) return null;
+  // A user may have multiple roles (e.g. learner + tutor). Pick the highest-privilege one.
+  const priority = ["admin", "tutor", "learner"];
+  const roles = data.map(r => r.role);
+  return priority.find(p => roles.includes(p as any)) || roles[0];
 }
 
 export async function getAllCourses() {
