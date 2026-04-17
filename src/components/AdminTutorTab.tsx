@@ -44,6 +44,16 @@ export default function AdminTutorTab({ tutors, users, tutorSearch, setTutorSear
         promoteTutor(existing.user_id);
         toast.success(`${existing.first_name || email} has been made a tutor!`);
       } else {
+        // Record pending invitation so they auto-promote on signup
+        const { error: pendingErr } = await supabase
+          .from("pending_tutor_invitations" as any)
+          .upsert({ email }, { onConflict: "email" });
+        if (pendingErr) {
+          toast.error("Failed to record invitation: " + pendingErr.message);
+          setInviting(false);
+          return;
+        }
+
         // Send invitation email
         const html = `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px;">
