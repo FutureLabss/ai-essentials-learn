@@ -44,6 +44,16 @@ export default function AdminTutorTab({ tutors, users, tutorSearch, setTutorSear
         promoteTutor(existing.user_id);
         toast.success(`${existing.first_name || email} has been made a tutor!`);
       } else {
+        // Record pending invitation so they auto-promote on signup
+        const { error: pendingErr } = await supabase
+          .from("pending_tutor_invitations" as any)
+          .upsert({ email }, { onConflict: "email" });
+        if (pendingErr) {
+          toast.error("Failed to record invitation: " + pendingErr.message);
+          setInviting(false);
+          return;
+        }
+
         // Send invitation email
         const html = `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px;">
@@ -79,7 +89,7 @@ export default function AdminTutorTab({ tutors, users, tutorSearch, setTutorSear
         if (error) {
           toast.error("Failed to send invitation: " + error.message);
         } else {
-          toast.success(`Invitation sent to ${email}! They'll need to sign up first, then you can promote them.`);
+          toast.success(`Invitation sent to ${email}! They'll be auto-promoted to tutor when they sign up.`);
         }
       }
 
