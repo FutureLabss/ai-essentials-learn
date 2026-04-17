@@ -89,7 +89,7 @@ export default function AdminTutorTab({ tutors, users, tutorSearch, setTutorSear
         if (error) {
           toast.error("Failed to send invitation: " + error.message);
         } else {
-          toast.success(`Invitation sent to ${email}! They'll need to sign up first, then you can promote them.`);
+          toast.success(`Invitation sent to ${email}! They'll be auto-promoted to tutor when they sign up.`);
         }
       }
 
