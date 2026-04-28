@@ -137,22 +137,37 @@ Deno.serve(async (req) => {
       }
     }
 
-    // --- 4. Inactivity reminder (3+ days inactive, sent once every 3 weeks) ---
+    // --- 4. Inactivity reminder (3+ days inactive, sent at most once every 3 weeks per user) ---
     const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString();
     const threeWeeksAgo = new Date(Date.now() - 21 * 24 * 60 * 60 * 1000).toISOString();
 
+    // Pre-fetch all reminder logs in the last 3 weeks (one query, avoids per-enrollment race conditions)
+    const { data: recentReminders } = await supabase
+      .from("email_logs")
+      .select("user_id, sent_at")
+      .eq("milestone_type", "inactivity_reminder")
+      .gte("sent_at", threeWeeksAgo);
+
+    const remindedUsers = new Set<string>((recentReminders || []).map((r: any) => r.user_id));
+
+    // Pre-fetch reminder preferences for all enrolled users
+    const enrolledUserIds = Array.from(new Set((enrollments || []).map((e: any) => e.user_id)));
+    const { data: prefs } = await supabase
+      .from("email_preferences")
+      .select("user_id, reminder_emails")
+      .in("user_id", enrolledUserIds);
+    const reminderOptOut = new Set<string>(
+      (prefs || []).filter((p: any) => p.reminder_emails === false).map((p: any) => p.user_id)
+    );
+
+    // Track users reminded within this run to prevent multiple sends across enrollments
+    const remindedThisRun = new Set<string>();
+
     if (enrollments) {
       for (const enrollment of enrollments) {
-        // Check if an inactivity reminder was already sent in the last 3 weeks
-        const { data: recentReminder } = await supabase
-          .from("email_logs")
-          .select("sent_at")
-          .eq("user_id", enrollment.user_id)
-          .eq("milestone_type", "inactivity_reminder")
-          .gte("sent_at", threeWeeksAgo)
-          .limit(1);
-
-        if (recentReminder && recentReminder.length > 0) continue;
+        if (reminderOptOut.has(enrollment.user_id)) continue;
+        if (remindedUsers.has(enrollment.user_id)) continue;
+        if (remindedThisRun.has(enrollment.user_id)) continue;
 
         // Check last activity
         const { data: recentProgress } = await supabase
