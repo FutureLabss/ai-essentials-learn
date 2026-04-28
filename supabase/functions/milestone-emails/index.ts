@@ -198,6 +198,7 @@ Deno.serve(async (req) => {
         const sent = await sendEmail(RESEND_API_KEY, profile.email, `We miss you! Continue ${course.name} 📚`, inactivityHtml(profile.first_name || "Learner", course.name));
         if (sent) {
           await logSent(supabase, enrollment.user_id, "inactivity_reminder", refId);
+          remindedThisRun.add(enrollment.user_id);
           results.inactivity_reminder++;
         } else {
           results.errors++;
