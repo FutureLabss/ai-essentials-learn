@@ -42,7 +42,44 @@ export default function AdminTutorTab({ tutors, users, tutorSearch, setTutorSear
         }
         // Promote directly
         promoteTutor(existing.user_id);
-        toast.success(`${existing.first_name || email} has been made a tutor!`);
+
+        // Send upgrade notification email
+        const upgradeHtml = `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px;">
+            <div style="background: hsl(20, 90%, 48%); padding: 20px; border-radius: 12px 12px 0 0;">
+              <h1 style="color: hsl(33, 100%, 96%); margin: 0; font-size: 20px;">AI Essentials by FutureLabs</h1>
+            </div>
+            <div style="background: #ffffff; padding: 24px; border: 1px solid #d4d4d4; border-top: none; border-radius: 0 0 12px 12px;">
+              <h2 style="color: hsl(0, 0%, 9%); margin: 0 0 16px;">You've Been Upgraded to Tutor! 🎉</h2>
+              <p style="color: hsl(0, 0%, 9%); line-height: 1.6;">
+                Hi ${existing.first_name || "there"},
+              </p>
+              <p style="color: hsl(0, 0%, 9%); line-height: 1.6;">
+                Great news! You've been promoted to <strong>Tutor</strong> on AI Essentials by FutureLabs. You now have access to the Tutor Dashboard where you can manage courses, track learner progress, and engage with students.
+              </p>
+              <div style="text-align: center; margin: 24px 0;">
+                <a href="https://ai.futurelabs.ng/tutor"
+                   style="background: hsl(20, 90%, 48%); color: hsl(33, 100%, 96%); padding: 12px 32px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block;">
+                  Go to Tutor Dashboard
+                </a>
+              </div>
+              <p style="color: #666; font-size: 13px; line-height: 1.6;">
+                If you have questions, just reply to this email.
+              </p>
+            </div>
+            <p style="text-align: center; color: #999; font-size: 12px; margin-top: 16px;">AI Essentials by FutureLabs</p>
+          </div>
+        `;
+
+        const { error: emailErr } = await supabase.functions.invoke("send-email", {
+          body: { to: [email], subject: "You're now a Tutor — AI Essentials by FutureLabs", html: upgradeHtml },
+        });
+
+        if (emailErr) {
+          toast.success(`${existing.first_name || email} has been made a tutor! (Email notification failed: ${emailErr.message})`);
+        } else {
+          toast.success(`${existing.first_name || email} has been made a tutor and notified by email!`);
+        }
       } else {
         // Record pending invitation so they auto-promote on signup
         const { error: pendingErr } = await supabase
