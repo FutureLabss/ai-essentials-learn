@@ -21,6 +21,7 @@ import Admin from "./pages/Admin";
 import TutorDashboard from "./pages/TutorDashboard";
 import Settings from "./pages/Settings";
 import Install from "./pages/Install";
+import Leaderboard from "./pages/Leaderboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -49,6 +50,7 @@ const App = () => (
             <Route path="/tutor" element={<ProtectedRoute requiredRole="tutor"><TutorDashboard /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><Admin /></ProtectedRoute>} />
             <Route path="/install" element={<Install />} />
+            <Route path="/leaderboard" element={<ProtectedRoute><Leaderboard /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>

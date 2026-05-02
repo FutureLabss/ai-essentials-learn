@@ -2,7 +2,7 @@ import { ReactNode } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { LogOut, BookOpen, LayoutDashboard, Users, Settings, GraduationCap } from "lucide-react";
+import { LogOut, BookOpen, LayoutDashboard, Users, Settings, GraduationCap, Trophy } from "lucide-react";
 import SearchBar from "@/components/SearchBar";
 import NotificationBell from "@/components/NotificationBell";
 
@@ -45,6 +45,9 @@ export default function AppShell({ children }: { children: ReactNode }) {
                     <Link to="/dashboard"><LayoutDashboard className="h-4 w-4 sm:mr-1" /><span className="hidden sm:inline">Dashboard</span></Link>
                   </Button>
                 )}
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to="/leaderboard"><Trophy className="h-4 w-4 sm:mr-1" /><span className="hidden sm:inline">Leaderboard</span></Link>
+                </Button>
                 <Button variant="ghost" size="sm" asChild>
                   <Link to="/settings"><Settings className="h-4 w-4" /></Link>
                 </Button>
