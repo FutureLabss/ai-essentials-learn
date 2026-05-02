@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
+import { awardPoints } from "@/lib/gamification";
 
 interface CourseReviewsProps {
   courseId: string;
@@ -55,6 +56,7 @@ export default function CourseReviews({ courseId, hasCompleted }: CourseReviewsP
       toast.error("Failed to submit review");
     } else {
       toast.success(myReview ? "Review updated!" : "Review submitted!");
+      if (!myReview) awardPoints("course_review", courseId);
       setShowForm(false);
       loadReviews();
     }

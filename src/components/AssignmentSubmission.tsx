@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { ExternalLink, CheckCircle, Send, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
+import { awardPoints } from "@/lib/gamification";
 
 const linkSchema = z.string().trim().url("Please enter a valid URL").max(2000, "Link is too long");
 

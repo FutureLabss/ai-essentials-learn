@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { MessageCircle, Send, Trash2, CornerDownRight } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
+import { awardPoints } from "@/lib/gamification";
 
 interface LessonDiscussionProps {
   lessonId: string;
@@ -47,6 +48,9 @@ export default function LessonDiscussion({ lessonId }: LessonDiscussionProps) {
     } else {
       if (parentId) { setReplyText(""); setReplyTo(null); }
       else setNewComment("");
+      // Award points (deduped per-day via reference_id)
+      const today = new Date().toISOString().slice(0, 10);
+      awardPoints("discussion_post", `${lessonId}-${today}`, { silent: true });
       loadComments();
     }
     setSubmitting(false);
