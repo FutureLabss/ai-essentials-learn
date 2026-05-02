@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { markLessonComplete, getUserProgress, getWeeksWithLessons, getCourseById, getUserEnrollment } from "@/lib/supabase-helpers";
+import { awardPoints } from "@/lib/gamification";
 import { getUnlockedWeekIds } from "@/lib/progression-helpers";
 import AppShell from "@/components/AppShell";
 import CourseSidebar from "@/components/CourseSidebar";
@@ -89,10 +90,18 @@ export default function Lesson() {
     setIsCompleted(true);
     setMarking(false);
     toast.success("Lesson completed!");
+    awardPoints("lesson_complete", id);
 
     const updatedProgress = [...progress, { lesson_id: id, completed: true }];
     setProgress(updatedProgress);
     const completedIds = new Set(updatedProgress.filter(p => p.completed).map(p => p.lesson_id));
+
+    // Award week-complete bonus if a week just got fully done
+    const week = weeks.find((w: any) => (w.lessons || []).some((l: any) => l.id === id));
+    if (week && (week.lessons || []).every((l: any) => completedIds.has(l.id))) {
+      awardPoints("week_complete", week.id);
+    }
+
     if (allLessons.every(l => completedIds.has(l.id)) && course) {
       const certId = `CERT-${Date.now()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
       await supabase.from("certificates").insert({
@@ -100,6 +109,7 @@ export default function Lesson() {
         course_id: course.id,
         certificate_id: certId,
       });
+      awardPoints("certificate_earned", course.id);
       toast.success("🎉 Congratulations! Your certificate is ready!");
       navigate("/certificate");
       return;

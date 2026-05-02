@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, CheckCircle, XCircle, Trophy, RotateCcw } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
+import { awardPoints } from "@/lib/gamification";
 
 export default function Quiz() {
   const { quizId } = useParams<{ quizId: string }>();
@@ -78,6 +79,16 @@ export default function Quiz() {
         answers: answers as any,
         passed: didPass,
       });
+      if (didPass) {
+        const isFirst = !previousAttempt || !previousAttempt.passed;
+        await awardPoints(
+          isFirst ? "quiz_pass_first" : "quiz_pass_retry",
+          quiz.id,
+        );
+        if (correct === questions.length) {
+          await awardPoints("quiz_perfect", quiz.id);
+        }
+      }
     } catch (err) {
       console.error(err);
     }

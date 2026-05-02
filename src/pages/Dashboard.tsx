@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { getAllCourses, getUserEnrollments, getUserProgress, getUserCertificate, getWeeksWithLessons, COURSE_PRICES, formatNaira } from "@/lib/supabase-helpers";
 import AppShell from "@/components/AppShell";
 import ProgressAnalytics from "@/components/ProgressAnalytics";
+import GamificationCard from "@/components/GamificationCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { BookOpen, Lock, Award, ArrowRight, Clock, Tag } from "lucide-react";
@@ -158,6 +159,11 @@ export default function Dashboard() {
           </h1>
           <p className="text-muted-foreground text-sm">{t("dashboard.subtitle")}</p>
         </motion.div>
+
+        {/* Gamification snapshot */}
+        <div className="mb-6">
+          <GamificationCard />
+        </div>
 
         {/* Progress Analytics */}
         {enrollments.length > 0 && (

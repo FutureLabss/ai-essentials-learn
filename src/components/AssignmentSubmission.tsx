@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { ExternalLink, CheckCircle, Send, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
+import { awardPoints } from "@/lib/gamification";
 
 const linkSchema = z.string().trim().url("Please enter a valid URL").max(2000, "Link is too long");
 
@@ -68,6 +69,7 @@ export default function AssignmentSubmission({ lessonId }: AssignmentSubmissionP
         .insert({ user_id: user.id, lesson_id: lessonId, submission_link: result.data });
       if (error) { toast.error("Failed to submit assignment"); setSubmitting(false); return; }
       toast.success("Assignment submitted!");
+      awardPoints("assignment_submit", lessonId);
     }
     setSubmitting(false);
     await loadSubmission();
