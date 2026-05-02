@@ -7,6 +7,8 @@ import AppShell from "@/components/AppShell";
 import EmailPreferences from "@/components/EmailPreferences";
 import LanguageSelector from "@/components/LanguageSelector";
 import NotificationReminder from "@/components/NotificationReminder";
+import BadgeGallery from "@/components/BadgeGallery";
+import LeaderboardOptIn from "@/components/LeaderboardOptIn";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -257,6 +259,8 @@ export default function SettingsPage() {
           <LanguageSelector />
           <NotificationReminder />
           <EmailPreferences />
+          <LeaderboardOptIn />
+          <BadgeGallery />
         </motion.div>
       </div>
     </AppShell>

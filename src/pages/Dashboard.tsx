@@ -160,6 +160,11 @@ export default function Dashboard() {
           <p className="text-muted-foreground text-sm">{t("dashboard.subtitle")}</p>
         </motion.div>
 
+        {/* Gamification snapshot */}
+        <div className="mb-6">
+          <GamificationCard />
+        </div>
+
         {/* Progress Analytics */}
         {enrollments.length > 0 && (
           <ProgressAnalytics
