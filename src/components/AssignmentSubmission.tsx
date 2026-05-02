@@ -68,6 +68,7 @@ export default function AssignmentSubmission({ lessonId }: AssignmentSubmissionP
         .insert({ user_id: user.id, lesson_id: lessonId, submission_link: result.data });
       if (error) { toast.error("Failed to submit assignment"); setSubmitting(false); return; }
       toast.success("Assignment submitted!");
+      awardPoints("assignment_submit", lessonId);
     }
     setSubmitting(false);
     await loadSubmission();
