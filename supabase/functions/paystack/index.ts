@@ -132,29 +132,54 @@ Deno.serve(async (req) => {
     if (action === "verify" && req.method === "POST") {
       const { reference } = await req.json();
 
+      // Lookup the local pending payment first (must belong to caller)
+      const { data: payment } = await serviceClient
+        .from("payments")
+        .select("course_id, user_id, amount, status")
+        .eq("payment_reference", reference)
+        .maybeSingle();
+
+      if (!payment || payment.user_id !== userId) {
+        return new Response(JSON.stringify({ success: false, message: "Payment not found" }), {
+          status: 404,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
       const paystackRes = await fetch(`https://api.paystack.co/transaction/verify/${reference}`, {
         headers: { Authorization: `Bearer ${PAYSTACK_SECRET}` },
       });
       const paystackData = await paystackRes.json();
 
-      if (paystackData.data?.status === "success") {
-        await supabase.from("payments").update({
+      const gatewaySuccess =
+        paystackData?.status === true &&
+        paystackData?.data?.status === "success" &&
+        typeof paystackData?.data?.amount === "number" &&
+        paystackData.data.amount >= Math.round(Number(payment.amount) * 100);
+
+      if (gatewaySuccess) {
+        await serviceClient.from("payments").update({
           status: "completed",
           paid_at: new Date().toISOString(),
         }).eq("payment_reference", reference);
 
-        const { data: payment } = await supabase.from("payments").select("course_id, user_id").eq("payment_reference", reference).single();
-        if (payment) {
-          await serviceClient.from("enrollments").update({ is_paid: true, is_unlocked: true })
-            .eq("user_id", payment.user_id).eq("course_id", payment.course_id);
-        }
+        await serviceClient.from("enrollments").update({ is_paid: true, is_unlocked: true })
+          .eq("user_id", payment.user_id).eq("course_id", payment.course_id);
 
         return new Response(JSON.stringify({ success: true }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
 
-      return new Response(JSON.stringify({ success: false, message: "Payment not verified" }), {
+      // Mark as failed locally so it can't be re-used
+      await serviceClient.from("payments").update({
+        status: "failed",
+      }).eq("payment_reference", reference).eq("status", "pending");
+
+      return new Response(JSON.stringify({
+        success: false,
+        message: paystackData?.data?.gateway_response || "Payment was not successful",
+      }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
