@@ -37,7 +37,7 @@ export default function Quiz() {
     try {
       const [{ data: q }, { data: qs }, { data: attempts }] = await Promise.all([
         supabase.from("quizzes").select("*").eq("id", quizId).single(),
-        supabase.from("quiz_questions").select("*").eq("quiz_id", quizId).order("question_order"),
+        supabase.rpc("get_quiz_questions_for_learner", { _quiz_id: quizId }),
         supabase.from("quiz_attempts").select("*").eq("quiz_id", quizId).eq("user_id", user.id).order("completed_at", { ascending: false }).limit(1),
       ]);
       setQuiz(q);
