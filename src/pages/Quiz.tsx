@@ -22,6 +22,7 @@ export default function Quiz() {
   const [score, setScore] = useState(0);
   const [passed, setPassed] = useState(false);
   const [previousAttempt, setPreviousAttempt] = useState<any>(null);
+  const [grading, setGrading] = useState<Record<string, { correct_answer: string; explanation: string | null; is_correct: boolean }>>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
