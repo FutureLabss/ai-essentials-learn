@@ -108,8 +108,19 @@ serve(async (req) => {
     }
 
     // Save current exchange to database
-    if (userId && messages.length > 0) {
+    if (messages.length > 0) {
       let activeConvoId = conversationId;
+      if (activeConvoId) {
+        // Verify ownership before mutating
+        const { data: convo } = await supabase
+          .from("chat_conversations")
+          .select("user_id")
+          .eq("id", activeConvoId)
+          .maybeSingle();
+        if (!convo || convo.user_id !== userId) {
+          activeConvoId = null;
+        }
+      }
       if (!activeConvoId) {
         const { data: newConvo } = await supabase
           .from("chat_conversations")
