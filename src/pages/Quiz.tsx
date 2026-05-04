@@ -122,6 +122,7 @@ export default function Quiz() {
     setScore(0);
     setPassed(false);
     setPreviousAttempt(null);
+    setGrading({});
   };
 
   if (authLoading || loading) {
