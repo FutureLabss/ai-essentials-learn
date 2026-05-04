@@ -259,7 +259,10 @@ export default function Quiz() {
             <div className="space-y-3">
               {questions.map((q, i) => {
                 const userAnswer = answers[q.id];
-                const isCorrect = userAnswer === q.correct_answer;
+                const g = grading[q.id];
+                const correctAnswer = g?.correct_answer;
+                const explanation = g?.explanation;
+                const isCorrect = g?.is_correct ?? false;
                 const qOptions: string[] = Array.isArray(q.options) ? q.options : [];
                 return (
                   <div key={q.id} className="rounded-lg border bg-card p-4">
@@ -276,7 +279,7 @@ export default function Quiz() {
                         <p
                           key={oi}
                           className={`text-sm px-2 py-1 rounded ${
-                            opt === q.correct_answer
+                            opt === correctAnswer
                               ? "bg-green-500/10 text-green-700 dark:text-green-400 font-medium"
                               : opt === userAnswer && !isCorrect
                                 ? "bg-destructive/10 text-destructive line-through"
@@ -286,8 +289,8 @@ export default function Quiz() {
                           {opt}
                         </p>
                       ))}
-                      {q.explanation && (
-                        <p className="text-xs text-muted-foreground mt-2 italic">{q.explanation}</p>
+                      {explanation && (
+                        <p className="text-xs text-muted-foreground mt-2 italic">{explanation}</p>
                       )}
                     </div>
                   </div>
