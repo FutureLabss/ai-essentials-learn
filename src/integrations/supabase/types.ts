@@ -967,9 +967,66 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      quiz_questions_public: {
+        Row: {
+          created_at: string | null
+          id: string | null
+          options: Json | null
+          question_order: number | null
+          question_text: string | null
+          question_type: string | null
+          quiz_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string | null
+          options?: Json | null
+          question_order?: number | null
+          question_text?: string | null
+          question_type?: string | null
+          quiz_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string | null
+          options?: Json | null
+          question_order?: number | null
+          question_text?: string | null
+          question_type?: string | null
+          quiz_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_questions_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "quizzes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
+      get_quiz_questions_for_learner: {
+        Args: { _quiz_id: string }
+        Returns: {
+          id: string
+          options: Json
+          question_order: number
+          question_text: string
+          question_type: string
+          quiz_id: string
+        }[]
+      }
+      grade_quiz_attempt: {
+        Args: { _answers: Json; _quiz_id: string }
+        Returns: {
+          correct_answer: string
+          explanation: string
+          is_correct: boolean
+          question_id: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
