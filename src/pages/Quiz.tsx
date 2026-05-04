@@ -22,6 +22,7 @@ export default function Quiz() {
   const [score, setScore] = useState(0);
   const [passed, setPassed] = useState(false);
   const [previousAttempt, setPreviousAttempt] = useState<any>(null);
+  const [grading, setGrading] = useState<Record<string, { correct_answer: string; explanation: string | null; is_correct: boolean }>>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -36,7 +37,7 @@ export default function Quiz() {
     try {
       const [{ data: q }, { data: qs }, { data: attempts }] = await Promise.all([
         supabase.from("quizzes").select("*").eq("id", quizId).single(),
-        supabase.from("quiz_questions").select("*").eq("quiz_id", quizId).order("question_order"),
+        supabase.rpc("get_quiz_questions_for_learner", { _quiz_id: quizId }),
         supabase.from("quiz_attempts").select("*").eq("quiz_id", quizId).eq("user_id", user.id).order("completed_at", { ascending: false }).limit(1),
       ]);
       setQuiz(q);
@@ -59,13 +60,33 @@ export default function Quiz() {
 
   const submitQuiz = async () => {
     if (!user || !quiz) return;
-    let correct = 0;
-    questions.forEach(q => {
-      if (answers[q.id] === q.correct_answer) correct++;
+
+    // Server-side grading: never trust client with correct_answer
+    const { data: gradeRows, error: gradeErr } = await supabase.rpc("grade_quiz_attempt", {
+      _quiz_id: quiz.id,
+      _answers: answers as any,
     });
+    if (gradeErr || !gradeRows) {
+      console.error(gradeErr);
+      toast.error("Failed to grade quiz");
+      return;
+    }
+
+    const gradeMap: Record<string, { correct_answer: string; explanation: string | null; is_correct: boolean }> = {};
+    let correct = 0;
+    for (const row of gradeRows as any[]) {
+      gradeMap[row.question_id] = {
+        correct_answer: row.correct_answer,
+        explanation: row.explanation,
+        is_correct: row.is_correct,
+      };
+      if (row.is_correct) correct++;
+    }
+
     const pct = Math.round((correct / questions.length) * 100);
     const didPass = pct >= quiz.passing_score;
 
+    setGrading(gradeMap);
     setScore(pct);
     setPassed(didPass);
     setSubmitted(true);
@@ -101,6 +122,7 @@ export default function Quiz() {
     setScore(0);
     setPassed(false);
     setPreviousAttempt(null);
+    setGrading({});
   };
 
   if (authLoading || loading) {
@@ -237,7 +259,10 @@ export default function Quiz() {
             <div className="space-y-3">
               {questions.map((q, i) => {
                 const userAnswer = answers[q.id];
-                const isCorrect = userAnswer === q.correct_answer;
+                const g = grading[q.id];
+                const correctAnswer = g?.correct_answer;
+                const explanation = g?.explanation;
+                const isCorrect = g?.is_correct ?? false;
                 const qOptions: string[] = Array.isArray(q.options) ? q.options : [];
                 return (
                   <div key={q.id} className="rounded-lg border bg-card p-4">
@@ -254,7 +279,7 @@ export default function Quiz() {
                         <p
                           key={oi}
                           className={`text-sm px-2 py-1 rounded ${
-                            opt === q.correct_answer
+                            opt === correctAnswer
                               ? "bg-green-500/10 text-green-700 dark:text-green-400 font-medium"
                               : opt === userAnswer && !isCorrect
                                 ? "bg-destructive/10 text-destructive line-through"
@@ -264,8 +289,8 @@ export default function Quiz() {
                           {opt}
                         </p>
                       ))}
-                      {q.explanation && (
-                        <p className="text-xs text-muted-foreground mt-2 italic">{q.explanation}</p>
+                      {explanation && (
+                        <p className="text-xs text-muted-foreground mt-2 italic">{explanation}</p>
                       )}
                     </div>
                   </div>
