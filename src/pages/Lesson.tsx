@@ -234,19 +234,29 @@ export default function Lesson() {
                         }
                       };
                       return (
-                        <div data-slide-wrapper className="relative aspect-video rounded-lg overflow-hidden border bg-black group">
+                        <div
+                          data-slide-wrapper
+                          className="relative aspect-video rounded-lg overflow-hidden border bg-black group select-none"
+                          onContextMenu={(e) => e.preventDefault()}
+                        >
                           <iframe
                             src={embedSrc}
                             title={`${lesson.title} - Slides`}
                             allow="autoplay; fullscreen"
                             allowFullScreen
                             frameBorder={0}
+                            referrerPolicy="no-referrer"
+                            sandbox="allow-scripts allow-same-origin allow-presentation"
                             className="w-full h-full"
                           />
+                          {/* Block the iframe's top/bottom "Open in new tab" + branding bars
+                              so the slides can only be viewed within this page */}
+                          <div className="absolute top-0 left-0 right-0 h-10 bg-transparent z-10" aria-hidden />
+                          <div className="absolute bottom-0 left-0 right-0 h-10 bg-transparent z-10" aria-hidden />
                           <button
                             type="button"
                             onClick={handleFullscreen}
-                            className="absolute top-2 right-2 px-3 py-1.5 text-xs rounded-md bg-background/80 backdrop-blur border shadow hover:bg-background transition opacity-0 group-hover:opacity-100 focus:opacity-100"
+                            className="absolute top-2 right-2 z-20 px-3 py-1.5 text-xs rounded-md bg-background/80 backdrop-blur border shadow hover:bg-background transition opacity-0 group-hover:opacity-100 focus:opacity-100"
                             aria-label="Toggle fullscreen"
                           >
                             ⛶ Fullscreen
@@ -255,9 +265,9 @@ export default function Lesson() {
                       );
                     }
                     return (
-                      <a href={url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-primary underline text-sm">
-                        View Slides →
-                      </a>
+                      <p className="text-xs text-muted-foreground italic">
+                        Slides are only viewable inside this lesson page.
+                      </p>
                     );
                   })()}
                 </div>
