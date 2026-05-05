@@ -203,20 +203,63 @@ export default function Lesson() {
               {lesson.slide_url && (
                 <div className="mb-8">
                   <h3 className="font-display font-semibold text-sm mb-2">📊 Slides</h3>
-                  {lesson.slide_url.includes("docs.google.com") || lesson.slide_url.includes("onedrive") || lesson.slide_url.includes("slideshare") ? (
-                    <div className="aspect-video rounded-lg overflow-hidden border">
-                      <iframe
-                        src={lesson.slide_url.includes("docs.google.com") ? lesson.slide_url.replace("/pub", "/embed") : lesson.slide_url}
-                        title={`${lesson.title} - Slides`}
-                        allowFullScreen
-                        className="w-full h-full"
-                      />
-                    </div>
-                  ) : (
-                    <a href={lesson.slide_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-primary underline text-sm">
-                      View Slides →
-                    </a>
-                  )}
+                  {(() => {
+                    const url = lesson.slide_url;
+                    const isGoogle = url.includes("docs.google.com/presentation");
+                    const isOneDrive = url.includes("onedrive") || url.includes("1drv.ms") || url.includes("office.com");
+                    const isSlideShare = url.includes("slideshare");
+                    if (isGoogle || isOneDrive || isSlideShare) {
+                      let embedSrc = url;
+                      if (isGoogle) {
+                        // Normalize any Google Slides URL to the /embed form so it renders inline
+                        embedSrc = url
+                          .replace(/\/(edit|present|pub|preview|view)(\?|$)/, "/embed$2")
+                          .replace(/([?&])(usp|rm|slide)=[^&]*/g, "$1")
+                          .replace(/[?&]$/, "");
+                        if (!/\/embed/.test(embedSrc)) {
+                          embedSrc = embedSrc.replace(/\/(d\/[^/]+)\/?$/, "/$1/embed");
+                        }
+                        if (!/[?&]start=/.test(embedSrc)) {
+                          embedSrc += (embedSrc.includes("?") ? "&" : "?") + "start=false&loop=false&delayms=3000";
+                        }
+                      }
+                      const handleFullscreen = (e: React.MouseEvent) => {
+                        const wrapper = (e.currentTarget as HTMLElement)
+                          .closest("[data-slide-wrapper]") as HTMLElement | null;
+                        if (!wrapper) return;
+                        if (document.fullscreenElement) {
+                          document.exitFullscreen();
+                        } else {
+                          wrapper.requestFullscreen?.();
+                        }
+                      };
+                      return (
+                        <div data-slide-wrapper className="relative aspect-video rounded-lg overflow-hidden border bg-black group">
+                          <iframe
+                            src={embedSrc}
+                            title={`${lesson.title} - Slides`}
+                            allow="autoplay; fullscreen"
+                            allowFullScreen
+                            frameBorder={0}
+                            className="w-full h-full"
+                          />
+                          <button
+                            type="button"
+                            onClick={handleFullscreen}
+                            className="absolute top-2 right-2 px-3 py-1.5 text-xs rounded-md bg-background/80 backdrop-blur border shadow hover:bg-background transition opacity-0 group-hover:opacity-100 focus:opacity-100"
+                            aria-label="Toggle fullscreen"
+                          >
+                            ⛶ Fullscreen
+                          </button>
+                        </div>
+                      );
+                    }
+                    return (
+                      <a href={url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-primary underline text-sm">
+                        View Slides →
+                      </a>
+                    );
+                  })()}
                 </div>
               )}
 
