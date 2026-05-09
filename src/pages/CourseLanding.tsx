@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { getCourseById, getWeeksWithLessons, COURSE_PRICES, formatNaira } from "@/lib/supabase-helpers";
+import { getCourseById, getWeeksWithLessons, formatNaira } from "@/lib/supabase-helpers";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Clock, CheckCircle, ArrowRight, ChevronDown, ChevronUp } from "lucide-react";
