@@ -91,7 +91,7 @@ export default function Signup() {
             Continue with Google
           </Button>
           <Button variant="outline" className="w-full" onClick={async () => {
-            const result = await lovable.auth.signInWithOAuth("apple", { redirect_uri: window.location.origin + "/dashboard" });
+            const result = await signInWithProvider("apple");
             if (result.error) { toast.error(result.error.message); return; }
             if (result.redirected) return;
             window.location.href = "/dashboard";
