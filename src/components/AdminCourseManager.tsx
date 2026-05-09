@@ -252,7 +252,7 @@ export default function AdminCourseManager({ onCourseCreated, editCourse, open: 
     // Update course details
     const { error: courseErr } = await supabase
       .from("courses")
-      .update({ name: courseName.trim(), description: courseDescription.trim() || null, duration_weeks: durationWeeks })
+      .update({ name: courseName.trim(), description: courseDescription.trim() || null, duration_weeks: durationWeeks, price_ngn: Math.max(0, Math.round(priceNgn)) })
       .eq("id", courseId);
     if (courseErr) throw courseErr;
 
