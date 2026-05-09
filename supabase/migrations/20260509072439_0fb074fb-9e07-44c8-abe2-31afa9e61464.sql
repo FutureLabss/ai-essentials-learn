@@ -1,0 +1,1 @@
+ALTER TABLE public.courses ADD COLUMN IF NOT EXISTS price_ngn integer NOT NULL DEFAULT 25000;

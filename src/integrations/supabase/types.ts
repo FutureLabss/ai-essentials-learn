@@ -221,6 +221,7 @@ export type Database = {
           id: string
           is_hidden: boolean
           name: string
+          price_ngn: number
         }
         Insert: {
           created_at?: string
@@ -229,6 +230,7 @@ export type Database = {
           id?: string
           is_hidden?: boolean
           name: string
+          price_ngn?: number
         }
         Update: {
           created_at?: string
@@ -237,6 +239,7 @@ export type Database = {
           id?: string
           is_hidden?: boolean
           name?: string
+          price_ngn?: number
         }
         Relationships: []
       }
