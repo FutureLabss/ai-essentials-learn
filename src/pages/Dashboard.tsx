@@ -181,7 +181,7 @@ export default function Dashboard() {
             const enrollment = getEnrollment(course.id);
             const cert = getCert(course.id);
             const isUnlocked = enrollment?.is_unlocked;
-            const price = COURSE_PRICES[course.id] || 25000;
+            const price = (course as any).price_ngn ?? 25000;
 
             return (
               <motion.div
