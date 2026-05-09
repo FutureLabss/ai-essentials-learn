@@ -328,9 +328,15 @@ export default function AdminCourseManager({ onCourseCreated, editCourse, open: 
               <label className="text-sm font-medium">Description</label>
               <Textarea value={courseDescription} onChange={e => setCourseDescription(e.target.value)} placeholder="Brief course description..." rows={2} />
             </div>
-            <div>
-              <label className="text-sm font-medium">Duration (weeks)</label>
-              <Input type="number" min={1} max={52} value={durationWeeks} onChange={e => setDurationWeeks(Number(e.target.value))} />
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-sm font-medium">Duration (weeks)</label>
+                <Input type="number" min={1} max={52} value={durationWeeks} onChange={e => setDurationWeeks(Number(e.target.value))} />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Price (₦)</label>
+                <Input type="number" min={0} step={500} value={priceNgn} onChange={e => setPriceNgn(Number(e.target.value))} placeholder="25000" />
+              </div>
             </div>
           </div>
 
