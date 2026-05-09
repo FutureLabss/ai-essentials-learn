@@ -49,6 +49,7 @@ interface CourseToEdit {
   name: string;
   description: string | null;
   duration_weeks: number;
+  price_ngn?: number;
 }
 
 interface Props {
