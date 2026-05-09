@@ -73,6 +73,7 @@ export default function AdminCourseManager({ onCourseCreated, editCourse, open: 
   const [courseName, setCourseName] = useState("");
   const [courseDescription, setCourseDescription] = useState("");
   const [durationWeeks, setDurationWeeks] = useState(6);
+  const [priceNgn, setPriceNgn] = useState<number>(25000);
   const [weeks, setWeeks] = useState<WeekDraft[]>([emptyWeek()]);
   const [improvingWeekIdx, setImprovingWeekIdx] = useState<number | null>(null);
   const [weekImproveInstructions, setWeekImproveInstructions] = useState("");
