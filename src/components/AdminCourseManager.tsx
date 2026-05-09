@@ -129,6 +129,7 @@ export default function AdminCourseManager({ onCourseCreated, editCourse, open: 
       setCourseName(editCourse.name);
       setCourseDescription(editCourse.description || "");
       setDurationWeeks(editCourse.duration_weeks);
+      setPriceNgn(editCourse.price_ngn ?? 25000);
       loadExistingWeeks(editCourse.id);
     }
   }, [editCourse, open]);
