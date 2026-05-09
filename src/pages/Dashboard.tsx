@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
-import { getAllCourses, getUserEnrollments, getUserProgress, getUserCertificate, getWeeksWithLessons, COURSE_PRICES, formatNaira } from "@/lib/supabase-helpers";
+import { getAllCourses, getUserEnrollments, getUserProgress, getUserCertificate, getWeeksWithLessons, formatNaira } from "@/lib/supabase-helpers";
 import AppShell from "@/components/AppShell";
 import ProgressAnalytics from "@/components/ProgressAnalytics";
 import GamificationCard from "@/components/GamificationCard";
