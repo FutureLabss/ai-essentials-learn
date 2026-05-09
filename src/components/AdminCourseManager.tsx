@@ -303,6 +303,7 @@ export default function AdminCourseManager({ onCourseCreated, editCourse, open: 
     setCourseName("");
     setCourseDescription("");
     setDurationWeeks(6);
+    setPriceNgn(25000);
     setWeeks([emptyWeek()]);
   };
 
