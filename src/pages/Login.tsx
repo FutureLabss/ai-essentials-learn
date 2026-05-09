@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
+import { signInWithProvider } from "@/lib/oauth-signin";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -63,7 +63,7 @@ export default function Login() {
 
         <div className="flex flex-col gap-3">
           <Button variant="outline" className="w-full" onClick={async () => {
-            const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin + "/dashboard" });
+            const result = await signInWithProvider("google");
             if (result.error) { toast.error(result.error.message); return; }
             if (result.redirected) return;
             navigate("/dashboard");
@@ -72,7 +72,7 @@ export default function Login() {
             Continue with Google
           </Button>
           <Button variant="outline" className="w-full" onClick={async () => {
-            const result = await lovable.auth.signInWithOAuth("apple", { redirect_uri: window.location.origin + "/dashboard" });
+            const result = await signInWithProvider("apple");
             if (result.error) { toast.error(result.error.message); return; }
             if (result.redirected) return;
             navigate("/dashboard");

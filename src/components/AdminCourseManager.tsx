@@ -49,6 +49,7 @@ interface CourseToEdit {
   name: string;
   description: string | null;
   duration_weeks: number;
+  price_ngn?: number;
 }
 
 interface Props {
@@ -72,6 +73,7 @@ export default function AdminCourseManager({ onCourseCreated, editCourse, open: 
   const [courseName, setCourseName] = useState("");
   const [courseDescription, setCourseDescription] = useState("");
   const [durationWeeks, setDurationWeeks] = useState(6);
+  const [priceNgn, setPriceNgn] = useState<number>(25000);
   const [weeks, setWeeks] = useState<WeekDraft[]>([emptyWeek()]);
   const [improvingWeekIdx, setImprovingWeekIdx] = useState<number | null>(null);
   const [weekImproveInstructions, setWeekImproveInstructions] = useState("");
@@ -127,6 +129,7 @@ export default function AdminCourseManager({ onCourseCreated, editCourse, open: 
       setCourseName(editCourse.name);
       setCourseDescription(editCourse.description || "");
       setDurationWeeks(editCourse.duration_weeks);
+      setPriceNgn(editCourse.price_ngn ?? 25000);
       loadExistingWeeks(editCourse.id);
     }
   }, [editCourse, open]);
@@ -209,7 +212,7 @@ export default function AdminCourseManager({ onCourseCreated, editCourse, open: 
   const handleCreate = async () => {
     const { data: course, error: courseErr } = await supabase
       .from("courses")
-      .insert({ name: courseName.trim(), description: courseDescription.trim() || null, duration_weeks: durationWeeks })
+      .insert({ name: courseName.trim(), description: courseDescription.trim() || null, duration_weeks: durationWeeks, price_ngn: Math.max(0, Math.round(priceNgn)) })
       .select()
       .single();
     if (courseErr) throw courseErr;
@@ -249,7 +252,7 @@ export default function AdminCourseManager({ onCourseCreated, editCourse, open: 
     // Update course details
     const { error: courseErr } = await supabase
       .from("courses")
-      .update({ name: courseName.trim(), description: courseDescription.trim() || null, duration_weeks: durationWeeks })
+      .update({ name: courseName.trim(), description: courseDescription.trim() || null, duration_weeks: durationWeeks, price_ngn: Math.max(0, Math.round(priceNgn)) })
       .eq("id", courseId);
     if (courseErr) throw courseErr;
 
@@ -300,6 +303,7 @@ export default function AdminCourseManager({ onCourseCreated, editCourse, open: 
     setCourseName("");
     setCourseDescription("");
     setDurationWeeks(6);
+    setPriceNgn(25000);
     setWeeks([emptyWeek()]);
   };
 
@@ -324,9 +328,15 @@ export default function AdminCourseManager({ onCourseCreated, editCourse, open: 
               <label className="text-sm font-medium">Description</label>
               <Textarea value={courseDescription} onChange={e => setCourseDescription(e.target.value)} placeholder="Brief course description..." rows={2} />
             </div>
-            <div>
-              <label className="text-sm font-medium">Duration (weeks)</label>
-              <Input type="number" min={1} max={52} value={durationWeeks} onChange={e => setDurationWeeks(Number(e.target.value))} />
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-sm font-medium">Duration (weeks)</label>
+                <Input type="number" min={1} max={52} value={durationWeeks} onChange={e => setDurationWeeks(Number(e.target.value))} />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Price (₦)</label>
+                <Input type="number" min={0} step={500} value={priceNgn} onChange={e => setPriceNgn(Number(e.target.value))} placeholder="25000" />
+              </div>
             </div>
           </div>
 

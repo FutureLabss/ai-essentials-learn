@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { getCourseById, getWeeksWithLessons, COURSE_PRICES, formatNaira } from "@/lib/supabase-helpers";
+import { getCourseById, getWeeksWithLessons, formatNaira } from "@/lib/supabase-helpers";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Clock, CheckCircle, ArrowRight, ChevronDown, ChevronUp } from "lucide-react";
@@ -36,7 +36,7 @@ export default function CourseLanding() {
   };
 
   const totalLessons = weeks.reduce((sum, w) => sum + w.lessons.length, 0);
-  const price = courseId ? COURSE_PRICES[courseId] || 25000 : 25000;
+  const price = course?.price_ngn ?? 25000;
 
   if (loading) {
     return (

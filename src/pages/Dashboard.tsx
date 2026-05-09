@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
-import { getAllCourses, getUserEnrollments, getUserProgress, getUserCertificate, getWeeksWithLessons, COURSE_PRICES, formatNaira } from "@/lib/supabase-helpers";
+import { getAllCourses, getUserEnrollments, getUserProgress, getUserCertificate, getWeeksWithLessons, formatNaira } from "@/lib/supabase-helpers";
 import AppShell from "@/components/AppShell";
 import ProgressAnalytics from "@/components/ProgressAnalytics";
 import GamificationCard from "@/components/GamificationCard";
@@ -65,7 +65,7 @@ export default function Dashboard() {
     setPayingCourse(courseId);
 
     try {
-      const amount = COURSE_PRICES[courseId] || 25000;
+      const amount = (courses.find(c => c.id === courseId) as any)?.price_ngn ?? 25000;
       const callbackUrl = `${window.location.origin}/dashboard?verify=${courseId}`;
       const discountCode = discountCodes[courseId]?.trim() || undefined;
 
@@ -181,7 +181,7 @@ export default function Dashboard() {
             const enrollment = getEnrollment(course.id);
             const cert = getCert(course.id);
             const isUnlocked = enrollment?.is_unlocked;
-            const price = COURSE_PRICES[course.id] || 25000;
+            const price = (course as any).price_ngn ?? 25000;
 
             return (
               <motion.div
