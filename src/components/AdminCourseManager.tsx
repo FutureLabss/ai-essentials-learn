@@ -212,7 +212,7 @@ export default function AdminCourseManager({ onCourseCreated, editCourse, open: 
   const handleCreate = async () => {
     const { data: course, error: courseErr } = await supabase
       .from("courses")
-      .insert({ name: courseName.trim(), description: courseDescription.trim() || null, duration_weeks: durationWeeks })
+      .insert({ name: courseName.trim(), description: courseDescription.trim() || null, duration_weeks: durationWeeks, price_ngn: Math.max(0, Math.round(priceNgn)) })
       .select()
       .single();
     if (courseErr) throw courseErr;
