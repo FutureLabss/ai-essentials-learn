@@ -82,7 +82,7 @@ export default function Signup() {
 
         <div className="flex flex-col gap-3">
           <Button variant="outline" className="w-full" onClick={async () => {
-            const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin + "/dashboard" });
+            const result = await signInWithProvider("google");
             if (result.error) { toast.error(result.error.message); return; }
             if (result.redirected) return;
             window.location.href = "/dashboard";
