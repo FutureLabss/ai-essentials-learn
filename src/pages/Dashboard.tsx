@@ -65,7 +65,7 @@ export default function Dashboard() {
     setPayingCourse(courseId);
 
     try {
-      const amount = COURSE_PRICES[courseId] || 25000;
+      const amount = (courses.find(c => c.id === courseId) as any)?.price_ngn ?? 25000;
       const callbackUrl = `${window.location.origin}/dashboard?verify=${courseId}`;
       const discountCode = discountCodes[courseId]?.trim() || undefined;
 
