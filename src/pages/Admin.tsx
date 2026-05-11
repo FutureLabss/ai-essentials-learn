@@ -17,6 +17,7 @@ import AdminDiscountTab from "@/components/AdminDiscountTab";
 import AdminBulkTab from "@/components/AdminBulkTab";
 import AdminTutorTab from "@/components/AdminTutorTab";
 import AdminQuizTab from "@/components/AdminQuizTab";
+import AdminClassroomsTab from "@/components/AdminClassroomsTab";
 import AiCourseGenerator from "@/components/AiCourseGenerator";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
