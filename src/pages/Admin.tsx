@@ -435,6 +435,10 @@ export default function Admin() {
             <AdminEmailTab courses={courses} />
           </TabsContent>
 
+          <TabsContent value="classrooms">
+            <AdminClassroomsTab />
+          </TabsContent>
+
           <TabsContent value="learners">
             <div className="flex flex-col sm:flex-row gap-4 mb-6">
               <div className="flex-1 relative">
