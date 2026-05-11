@@ -22,6 +22,9 @@ import TutorDashboard from "./pages/TutorDashboard";
 import Settings from "./pages/Settings";
 import Install from "./pages/Install";
 import Leaderboard from "./pages/Leaderboard";
+import Classrooms from "./pages/Classrooms";
+import ClassroomDetail from "./pages/ClassroomDetail";
+import InvitationAccept from "./pages/InvitationAccept";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
