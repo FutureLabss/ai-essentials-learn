@@ -54,6 +54,9 @@ const App = () => (
             <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><Admin /></ProtectedRoute>} />
             <Route path="/install" element={<Install />} />
             <Route path="/leaderboard" element={<ProtectedRoute><Leaderboard /></ProtectedRoute>} />
+            <Route path="/classroom" element={<ProtectedRoute><Classrooms /></ProtectedRoute>} />
+            <Route path="/classroom/:id" element={<ProtectedRoute><ClassroomDetail /></ProtectedRoute>} />
+            <Route path="/invitation/:token" element={<InvitationAccept />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
