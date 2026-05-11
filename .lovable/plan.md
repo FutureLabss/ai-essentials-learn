@@ -1,133 +1,71 @@
-# Leaderboard & Gamification
+# Classroom Feature — Staff Invitations & Access
 
-Bring learners back daily by rewarding progress with points, streaks, and badges, and showing a friendly public leaderboard.
+A new "Classroom" subsystem layered on top of the existing courses/users. It lets admins assign existing staff (or invite new ones) to classrooms/cohorts with role-based permissions (teaching vs non-teaching), with email + in-app invitations.
 
-## What learners will see
+## Scope
 
-1. **Gamification card on Dashboard** — total points, current streak (with flame icon), rank, and next badge progress.
-2. **Leaderboard page (`/leaderboard`)** — top 50 learners this week, this month, and all-time. Tabs to switch. Shows display name (first name + last initial), avatar, points, streak. Current user always pinned at the bottom if not in top 50.
-3. **Badge gallery** — unlocked vs locked badges with descriptions, on profile/Settings page.
-4. **Toast + animation** when points are earned or a badge unlocked ("+10 points · Lesson complete!").
-5. **Streak reminder** — small banner if streak is at risk today (push/email already exists; add UI nudge).
+- New roles: `teaching_staff`, `non_teaching_staff` (extend `app_role` enum).
+- New entities: classrooms, cohorts, classroom_permissions, staff_classrooms, staff_invitations, class_schedules, attendance_sessions, attendance_records.
+- Invitation flow with email (Resend, already configured) + in-app notification.
+- Admin UI: manage classrooms, invite/assign staff, manage permissions.
+- Staff UI: pending invitations, accept invitation, classroom dashboard.
+- Permissions enforced via RLS + UI gating.
 
-## Point rules (configurable)
+## Database (migration)
 
-| Action | Points |
-|---|---|
-| Complete a lesson | 10 |
-| Pass a quiz (first attempt) | 25 |
-| Pass a quiz (retry) | 10 |
-| Submit an assignment | 15 |
-| Complete a week | 50 (bonus) |
-| Earn a certificate | 200 |
-| Daily login (first lesson activity of day) | 5 |
-| Post in discussion | 5 (cap 2/day) |
-| Leave a course review | 20 |
+```text
+app_role enum: add 'teaching_staff', 'non_teaching_staff'
 
-Points are awarded server-side only, never trusted from the client.
-
-## Streak rules
-
-- Streak = consecutive days with at least one completed lesson.
-- Resets to 0 if a day is missed (timezone: Africa/Lagos).
-- Milestones: 3, 7, 14, 30, 60, 100 days → award badges.
-
-## Badges (initial set)
-
-Progression: First Step (1 lesson), Week Warrior (1 week complete), Course Champion (1 course complete), Polymath (2+ courses).
-Streaks: On Fire (3-day), Unstoppable (7-day), Devoted (30-day).
-Quality: Perfect Score (100% on a quiz), Helpful Voice (10 discussion posts), Reviewer (left a review).
-Special: Early Bird (joined first month), Referrer (once referrals ship).
-
-## Privacy
-
-- Leaderboard opt-out toggle in Settings (default: opted in).
-- Display name only (first name + last initial). Never email or phone.
-
-## Technical plan
-
-### Database (migration)
-
-```sql
--- Points ledger (auditable, append-only)
-create table public.point_events (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null,
-  event_type text not null,           -- 'lesson_complete', 'quiz_pass', etc.
-  reference_id text,                  -- lesson_id / quiz_id / etc.
-  points int not null,
-  created_at timestamptz not null default now(),
-  unique (user_id, event_type, reference_id)  -- prevents double-award
-);
-
--- Aggregated user stats (denormalized for fast leaderboard)
-create table public.user_gamification (
-  user_id uuid primary key,
-  total_points int not null default 0,
-  current_streak int not null default 0,
-  longest_streak int not null default 0,
-  last_active_date date,
-  leaderboard_opt_in boolean not null default true,
-  updated_at timestamptz not null default now()
-);
-
--- Badge catalog + unlocks
-create table public.badges (
-  id text primary key,                -- 'first_step', 'on_fire', etc.
-  name text not null,
-  description text not null,
-  icon text not null,                 -- lucide icon name
-  category text not null              -- 'progression' | 'streak' | 'quality' | 'special'
-);
-
-create table public.user_badges (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null,
-  badge_id text not null references public.badges(id),
-  earned_at timestamptz not null default now(),
-  unique (user_id, badge_id)
-);
+classrooms(id, name, description, course_id?, created_by, created_at)
+cohorts(id, classroom_id, name, start_date, end_date, created_by, created_at)
+staff_classrooms(id, user_id, classroom_id, role 'teaching'|'non_teaching', assigned_by, assigned_at, UNIQUE(user_id, classroom_id))
+classroom_permissions(id, user_id, classroom_id, permission text, granted_at)
+staff_invitations(id, email, classroom_id, cohort_id?, staff_role, token UNIQUE, status 'pending'|'accepted'|'revoked'|'expired', invited_by, created_at, accepted_at?, expires_at)
+class_schedules(id, cohort_id, title, scheduled_at, duration_minutes, created_by)
+attendance_sessions(id, cohort_id, schedule_id?, code UNIQUE, opened_at, closes_at, created_by)
+attendance_records(id, session_id, user_id, marked_at, UNIQUE(session_id,user_id))
 ```
 
-RLS:
-- `point_events`: users SELECT own; service role INSERT.
-- `user_gamification`: users SELECT own + SELECT others where `leaderboard_opt_in = true`; users UPDATE own (only `leaderboard_opt_in`); service role full access.
-- `badges`: authenticated SELECT.
-- `user_badges`: authenticated SELECT (public for leaderboard profile peek); service role INSERT.
+RLS: admins manage everything; teaching staff manage their assigned classrooms; non-teaching staff get read-only on assigned classrooms; students can only mark attendance for their cohort.
 
-### Edge function: `award-points`
+Helper SQL functions:
+- `is_classroom_staff(_user, _classroom)` (security definer)
+- `is_teaching_staff(_user, _classroom)` (security definer)
 
-Single source of truth. Called from existing flows (lesson complete, quiz attempt, etc.). Validates JWT, checks for duplicate via unique constraint, inserts `point_events`, recomputes `user_gamification` (points + streak), evaluates badge rules and inserts unlocks. Returns `{ pointsAdded, newTotal, streak, newBadges[] }`.
+## Edge Functions
 
-### Client integration points
+- `invite-staff` — create invitation row, generate token, send email via Resend, insert in-app notification if user already exists.
+- `accept-invitation` — validate token, attach `staff_classrooms` + role, assign user_role if needed, mark invitation accepted.
 
-- `markLessonComplete` → invoke `award-points` with `lesson_complete`.
-- Quiz submit (`Quiz.tsx`) → invoke with `quiz_pass` (only if passed).
-- `AssignmentSubmission.tsx` → `assignment_submit`.
-- `LessonDiscussion.tsx` → `discussion_post`.
-- `CourseReviews.tsx` → `course_review`.
-- Certificate creation → `certificate_earned`.
+## Frontend
 
-Show toast with points/badges from response.
+New routes:
+- `/admin/classrooms` (admin) — list/create classrooms, manage cohorts, invite staff, manage permissions.
+- `/classroom` (staff) — dashboard listing assigned classrooms.
+- `/classroom/:id` — classroom detail (cohorts, schedules, attendance, students).
+- `/invitation/:token` — public route to accept invitation (sign in / create password if new).
+- `/staff/invitations` — pending invitations list.
 
-### New files
+Components:
+- `AdminClassroomsTab` (added to existing Admin page)
+- `ClassroomManager`, `CohortManager`, `StaffInviteDialog`, `ClassroomDashboard`, `PendingInvitations`, `AttendanceManager`, `ScheduleManager`.
 
-- `src/pages/Leaderboard.tsx` — tabs (Weekly/Monthly/All-time), avatar list, current-user pin.
-- `src/components/GamificationCard.tsx` — Dashboard widget (points, streak, next badge).
-- `src/components/BadgeGallery.tsx` — used in Settings.
-- `src/lib/gamification.ts` — typed wrapper around `award-points` invoke.
-- `supabase/functions/award-points/index.ts`.
-- Route `/leaderboard` added to `App.tsx`, nav link in `AppShell`.
+UI gating uses `staff_classrooms.role` to hide create/edit actions for non-teaching staff.
 
-### Backfill
+## Email
 
-One-time SQL to seed `point_events` from existing `lesson_progress`, `quiz_attempts`, `certificates`, `assignment_submissions`, `course_reviews` so existing learners aren't at zero. Then refresh `user_gamification`.
+Use existing `send-email` edge function + Resend to send invitation with link to `/invitation/:token`. In-app notification inserted into existing `notifications` table.
 
-## Out of scope (next iteration)
+## Out of scope (this iteration)
 
-- Cohort-only leaderboards
-- Tutor/admin role excluded from leaderboard
-- Seasons/resets
-- Redeemable rewards (discount codes for top learners)
+- Real-time attendance scanning (QR) — codes only.
+- Payroll integration beyond reading existing user records.
+- Bulk CSV staff import (admin invites individually or by email).
 
-Ready to build?
+## Acceptance
+
+- Admin can create classroom + cohort, invite staff by email.
+- Existing user receives in-app notification + email; on accept gains classroom access.
+- New user follows signup → invitation flow.
+- Teaching staff can create cohorts/lessons/schedules/attendance for their classrooms.
+- Non-teaching staff can only view; create buttons hidden + RLS blocks writes.

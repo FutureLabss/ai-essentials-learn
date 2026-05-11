@@ -20,3 +20,9 @@ verify_jwt = false
 
 [functions.improve-course]
 verify_jwt = false
+
+[functions.invite-staff]
+verify_jwt = false
+
+[functions.accept-invitation]
+verify_jwt = false

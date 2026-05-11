@@ -52,6 +52,83 @@ export type Database = {
           },
         ]
       }
+      attendance_records: {
+        Row: {
+          id: string
+          marked_at: string
+          session_id: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          marked_at?: string
+          session_id: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          marked_at?: string
+          session_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_records_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "attendance_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      attendance_sessions: {
+        Row: {
+          closes_at: string
+          code: string
+          cohort_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          opened_at: string
+          schedule_id: string | null
+        }
+        Insert: {
+          closes_at?: string
+          code: string
+          cohort_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          opened_at?: string
+          schedule_id?: string | null
+        }
+        Update: {
+          closes_at?: string
+          code?: string
+          cohort_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          opened_at?: string
+          schedule_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_sessions_cohort_id_fkey"
+            columns: ["cohort_id"]
+            isOneToOne: false
+            referencedRelation: "cohorts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_sessions_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
+            referencedRelation: "class_schedules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       badges: {
         Row: {
           category: string
@@ -174,6 +251,187 @@ export type Database = {
             columns: ["conversation_id"]
             isOneToOne: false
             referencedRelation: "chat_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      class_schedules: {
+        Row: {
+          cohort_id: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          duration_minutes: number
+          id: string
+          meeting_url: string | null
+          scheduled_at: string
+          title: string
+        }
+        Insert: {
+          cohort_id: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          duration_minutes?: number
+          id?: string
+          meeting_url?: string | null
+          scheduled_at: string
+          title: string
+        }
+        Update: {
+          cohort_id?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          duration_minutes?: number
+          id?: string
+          meeting_url?: string | null
+          scheduled_at?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_schedules_cohort_id_fkey"
+            columns: ["cohort_id"]
+            isOneToOne: false
+            referencedRelation: "cohorts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      classroom_permissions: {
+        Row: {
+          classroom_id: string
+          granted_at: string
+          id: string
+          permission: string
+          user_id: string
+        }
+        Insert: {
+          classroom_id: string
+          granted_at?: string
+          id?: string
+          permission: string
+          user_id: string
+        }
+        Update: {
+          classroom_id?: string
+          granted_at?: string
+          id?: string
+          permission?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "classroom_permissions_classroom_id_fkey"
+            columns: ["classroom_id"]
+            isOneToOne: false
+            referencedRelation: "classrooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      classrooms: {
+        Row: {
+          course_id: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          course_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          course_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "classrooms_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cohort_enrollments: {
+        Row: {
+          cohort_id: string
+          enrolled_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          cohort_id: string
+          enrolled_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          cohort_id?: string
+          enrolled_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cohort_enrollments_cohort_id_fkey"
+            columns: ["cohort_id"]
+            isOneToOne: false
+            referencedRelation: "cohorts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cohorts: {
+        Row: {
+          classroom_id: string
+          created_at: string
+          created_by: string | null
+          end_date: string | null
+          id: string
+          name: string
+          start_date: string | null
+        }
+        Insert: {
+          classroom_id: string
+          created_at?: string
+          created_by?: string | null
+          end_date?: string | null
+          id?: string
+          name: string
+          start_date?: string | null
+        }
+        Update: {
+          classroom_id?: string
+          created_at?: string
+          created_by?: string | null
+          end_date?: string | null
+          id?: string
+          name?: string
+          start_date?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cohorts_classroom_id_fkey"
+            columns: ["classroom_id"]
+            isOneToOne: false
+            referencedRelation: "classrooms"
             referencedColumns: ["id"]
           },
         ]
@@ -859,6 +1117,98 @@ export type Database = {
           },
         ]
       }
+      staff_classrooms: {
+        Row: {
+          assigned_at: string
+          assigned_by: string | null
+          classroom_id: string
+          id: string
+          staff_role: string
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by?: string | null
+          classroom_id: string
+          id?: string
+          staff_role: string
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string | null
+          classroom_id?: string
+          id?: string
+          staff_role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_classrooms_classroom_id_fkey"
+            columns: ["classroom_id"]
+            isOneToOne: false
+            referencedRelation: "classrooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      staff_invitations: {
+        Row: {
+          accepted_at: string | null
+          classroom_id: string
+          cohort_id: string | null
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invited_by: string | null
+          staff_role: string
+          status: string
+          token: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          classroom_id: string
+          cohort_id?: string | null
+          created_at?: string
+          email: string
+          expires_at?: string
+          id?: string
+          invited_by?: string | null
+          staff_role: string
+          status?: string
+          token: string
+        }
+        Update: {
+          accepted_at?: string | null
+          classroom_id?: string
+          cohort_id?: string | null
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string | null
+          staff_role?: string
+          status?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_invitations_classroom_id_fkey"
+            columns: ["classroom_id"]
+            isOneToOne: false
+            referencedRelation: "classrooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_invitations_cohort_id_fkey"
+            columns: ["cohort_id"]
+            isOneToOne: false
+            referencedRelation: "cohorts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_badges: {
         Row: {
           badge_id: string
@@ -1037,9 +1387,34 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_classroom_staff: {
+        Args: { _classroom: string; _user: string }
+        Returns: boolean
+      }
+      is_classroom_staff_for_cohort: {
+        Args: { _cohort: string; _user: string }
+        Returns: boolean
+      }
+      is_in_cohort: {
+        Args: { _cohort: string; _user: string }
+        Returns: boolean
+      }
+      is_teaching_staff: {
+        Args: { _classroom: string; _user: string }
+        Returns: boolean
+      }
+      is_teaching_staff_for_cohort: {
+        Args: { _cohort: string; _user: string }
+        Returns: boolean
+      }
     }
     Enums: {
-      app_role: "admin" | "learner" | "tutor"
+      app_role:
+        | "admin"
+        | "learner"
+        | "tutor"
+        | "teaching_staff"
+        | "non_teaching_staff"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1167,7 +1542,13 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "learner", "tutor"],
+      app_role: [
+        "admin",
+        "learner",
+        "tutor",
+        "teaching_staff",
+        "non_teaching_staff",
+      ],
     },
   },
 } as const

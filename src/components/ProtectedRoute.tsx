@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRole?: "admin" | "tutor" | "learner";
+  requiredRole?: "admin" | "tutor" | "learner" | "teaching_staff" | "non_teaching_staff" | "any_staff";
 }
 
 export default function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {

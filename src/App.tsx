@@ -22,6 +22,9 @@ import TutorDashboard from "./pages/TutorDashboard";
 import Settings from "./pages/Settings";
 import Install from "./pages/Install";
 import Leaderboard from "./pages/Leaderboard";
+import Classrooms from "./pages/Classrooms";
+import ClassroomDetail from "./pages/ClassroomDetail";
+import InvitationAccept from "./pages/InvitationAccept";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -51,6 +54,9 @@ const App = () => (
             <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><Admin /></ProtectedRoute>} />
             <Route path="/install" element={<Install />} />
             <Route path="/leaderboard" element={<ProtectedRoute><Leaderboard /></ProtectedRoute>} />
+            <Route path="/classroom" element={<ProtectedRoute><Classrooms /></ProtectedRoute>} />
+            <Route path="/classroom/:id" element={<ProtectedRoute><ClassroomDetail /></ProtectedRoute>} />
+            <Route path="/invitation/:token" element={<InvitationAccept />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
