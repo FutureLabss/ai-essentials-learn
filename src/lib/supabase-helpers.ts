@@ -57,6 +57,26 @@ export async function getCourseById(courseId: string) {
   return data;
 }
 
+// Enrolls a user in a free "tag" course looked up by exact name (used for
+// event signup pages — see src/lib/events.ts). No-ops if already enrolled.
+export async function enrollInCourseByName(userId: string, courseName: string) {
+  const { data: course, error: courseErr } = await supabase
+    .from("courses")
+    .select("id")
+    .eq("name", courseName)
+    .maybeSingle();
+  if (courseErr) throw courseErr;
+  if (!course) return;
+
+  const { error } = await supabase
+    .from("enrollments")
+    .upsert(
+      { user_id: userId, course_id: course.id, is_paid: true, is_unlocked: true },
+      { onConflict: "user_id,course_id", ignoreDuplicates: true }
+    );
+  if (error) throw error;
+}
+
 export async function getWeeksWithLessons(courseId: string) {
   const { data: weeks, error: weeksError } = await supabase
     .from("weeks")

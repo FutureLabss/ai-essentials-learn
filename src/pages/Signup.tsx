@@ -1,15 +1,25 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { signInWithProvider } from "@/lib/oauth-signin";
+import { getEvent } from "@/lib/events";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { BookOpen, MailCheck } from "lucide-react";
+import { BookOpen, MailCheck, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
+const PENDING_SIGNUP_KEY = "pending_signup_meta";
+
 export default function Signup() {
+  const [searchParams] = useSearchParams();
+  const eventSlug = searchParams.get("event");
+  const event = getEvent(eventSlug);
+
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -18,14 +28,29 @@ export default function Signup() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim() || !password.trim()) return;
+    if (event && (!firstName.trim() || !lastName.trim())) {
+      toast.error("Please enter your first and last name");
+      return;
+    }
     setLoading(true);
+
+    // Stashed for useAuth to apply once a session exists (may be after the
+    // user clicks the email verification link, not right now).
+    localStorage.setItem(PENDING_SIGNUP_KEY, JSON.stringify({
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      phone: phone.trim(),
+      eventSlug,
+    }));
+
     const { error } = await supabase.auth.signUp({
       email: email.trim(),
       password,
-      options: { emailRedirectTo: window.location.origin },
+      options: { emailRedirectTo: `${window.location.origin}/dashboard` },
     });
     setLoading(false);
     if (error) {
+      localStorage.removeItem(PENDING_SIGNUP_KEY);
       toast.error(error.message);
     } else {
       setSubmitted(true);
@@ -61,7 +86,36 @@ export default function Signup() {
           </Link>
           <p className="text-muted-foreground text-sm">Create your account to get started</p>
         </div>
+
+        {event && (
+          <div className="mb-6 rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 flex gap-3 items-start">
+            <Sparkles className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+            <div>
+              <p className="text-sm font-semibold">{event.title}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{event.subtitle}</p>
+            </div>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
+          {event && (
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label htmlFor="firstName">First name</Label>
+                <Input id="firstName" value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="Aniekan" required />
+              </div>
+              <div>
+                <Label htmlFor="lastName">Last name</Label>
+                <Input id="lastName" value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Udoh" required />
+              </div>
+            </div>
+          )}
+          {event && (
+            <div>
+              <Label htmlFor="phone">Phone (optional)</Label>
+              <Input id="phone" type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="080..." />
+            </div>
+          )}
           <div>
             <Label htmlFor="email">Email</Label>
             <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com" required />
@@ -82,6 +136,7 @@ export default function Signup() {
 
         <div className="flex flex-col gap-3">
           <Button variant="outline" className="w-full" onClick={async () => {
+            if (eventSlug) localStorage.setItem(PENDING_SIGNUP_KEY, JSON.stringify({ eventSlug }));
             const result = await signInWithProvider("google");
             if (result.error) { toast.error(result.error.message); return; }
             if (result.redirected) return;
@@ -91,6 +146,7 @@ export default function Signup() {
             Continue with Google
           </Button>
           <Button variant="outline" className="w-full" onClick={async () => {
+            if (eventSlug) localStorage.setItem(PENDING_SIGNUP_KEY, JSON.stringify({ eventSlug }));
             const result = await signInWithProvider("apple");
             if (result.error) { toast.error(result.error.message); return; }
             if (result.redirected) return;
