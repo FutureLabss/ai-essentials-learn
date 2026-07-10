@@ -11,6 +11,7 @@ import AppShell from "@/components/AppShell";
 
 const genderOptions = ["Male", "Female", "Non-binary", "Prefer not to say"];
 const reasonOptions = ["Career advancement", "Personal interest", "Academic requirement", "Employer mandate", "Other"];
+const affiliateOptions = ["None", "Ukana"];
 
 export default function KYC() {
   const { user, refreshProfile } = useAuth();
