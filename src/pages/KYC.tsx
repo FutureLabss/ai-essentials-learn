@@ -19,7 +19,7 @@ export default function KYC() {
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     first_name: "", last_name: "", phone: "", gender: "",
-    country: "", reason_for_course: "",
+    country: "", reason_for_course: "", affiliate: "",
   });
 
   const set = (key: string, value: string) => setForm(f => ({ ...f, [key]: value }));
