@@ -162,6 +162,9 @@ export default function AdminEmailTab({ courses }: { courses: Course[] }) {
             <SelectItem value="course">
               <span className="flex items-center gap-2"><Mail className="h-4 w-4" /> Course enrollees</span>
             </SelectItem>
+            <SelectItem value="affiliate">
+              <span className="flex items-center gap-2"><Users className="h-4 w-4" /> Affiliate group</span>
+            </SelectItem>
             <SelectItem value="individual">
               <span className="flex items-center gap-2"><User className="h-4 w-4" /> Individual</span>
             </SelectItem>
@@ -177,6 +180,17 @@ export default function AdminEmailTab({ courses }: { courses: Course[] }) {
               {courses.map(c => (
                 <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
               ))}
+            </SelectContent>
+          </Select>
+        )}
+
+        {audience === "affiliate" && (
+          <Select value={selectedAffiliate} onValueChange={setSelectedAffiliate}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select affiliate" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Ukana">Ukana</SelectItem>
             </SelectContent>
           </Select>
         )}
