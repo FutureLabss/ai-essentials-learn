@@ -72,6 +72,14 @@ export default function AdminEmailTab({ courses }: { courses: Course[] }) {
       userIds = (enrollments || []).map(e => e.user_id);
     }
 
+    if (audience === "affiliate" && selectedAffiliate) {
+      const { data } = await supabase
+        .from("profiles")
+        .select("email")
+        .eq("affiliate", selectedAffiliate);
+      return (data || []).map(p => p.email);
+    }
+
     if (userIds.length === 0) return [];
 
     const { data: profiles } = await supabase
