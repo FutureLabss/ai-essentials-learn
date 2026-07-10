@@ -15,6 +15,7 @@ interface Course {
 export default function AdminEmailTab({ courses }: { courses: Course[] }) {
   const [audience, setAudience] = useState<string>("all");
   const [selectedCourse, setSelectedCourse] = useState<string>("");
+  const [selectedAffiliate, setSelectedAffiliate] = useState<string>("Ukana");
   const [individualEmail, setIndividualEmail] = useState("");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
