@@ -920,6 +920,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          affiliate: string | null
           avatar_url: string | null
           city_town: string | null
           country: string | null
@@ -941,6 +942,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          affiliate?: string | null
           avatar_url?: string | null
           city_town?: string | null
           country?: string | null
@@ -962,6 +964,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          affiliate?: string | null
           avatar_url?: string | null
           city_town?: string | null
           country?: string | null
