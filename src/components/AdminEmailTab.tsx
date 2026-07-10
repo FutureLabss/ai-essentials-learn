@@ -24,7 +24,7 @@ export default function AdminEmailTab({ courses }: { courses: Course[] }) {
 
   useEffect(() => {
     loadRecipientCount();
-  }, [audience, selectedCourse]);
+  }, [audience, selectedCourse, selectedAffiliate, individualEmail]);
 
   const loadRecipientCount = async () => {
     if (audience === "individual") {
@@ -41,6 +41,12 @@ export default function AdminEmailTab({ courses }: { courses: Course[] }) {
         .select("user_id")
         .eq("course_id", selectedCourse);
       setRecipientCount(enrollments?.length || 0);
+    } else if (audience === "affiliate" && selectedAffiliate) {
+      const { count } = await supabase
+        .from("profiles")
+        .select("*", { count: "exact", head: true })
+        .eq("affiliate", selectedAffiliate);
+      setRecipientCount(count || 0);
     } else {
       setRecipientCount(0);
     }
