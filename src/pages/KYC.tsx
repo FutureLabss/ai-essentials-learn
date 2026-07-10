@@ -80,6 +80,13 @@ export default function KYC() {
               <SelectContent>{reasonOptions.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
             </Select>
           </div>
+          <div>
+            <Label>Affiliate</Label>
+            <Select onValueChange={v => set("affiliate", v === "None" ? "" : v)}>
+              <SelectTrigger><SelectValue placeholder="Select affiliate (optional)" /></SelectTrigger>
+              <SelectContent>{affiliateOptions.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
+            </Select>
+          </div>
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? "Saving…" : "Complete Profile"}
           </Button>
