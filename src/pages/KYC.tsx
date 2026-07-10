@@ -11,6 +11,7 @@ import AppShell from "@/components/AppShell";
 
 const genderOptions = ["Male", "Female", "Non-binary", "Prefer not to say"];
 const reasonOptions = ["Career advancement", "Personal interest", "Academic requirement", "Employer mandate", "Other"];
+const affiliateOptions = ["None", "Ukana"];
 
 export default function KYC() {
   const { user, refreshProfile } = useAuth();
@@ -18,7 +19,7 @@ export default function KYC() {
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     first_name: "", last_name: "", phone: "", gender: "",
-    country: "", reason_for_course: "",
+    country: "", reason_for_course: "", affiliate: "",
   });
 
   const set = (key: string, value: string) => setForm(f => ({ ...f, [key]: value }));
@@ -77,6 +78,13 @@ export default function KYC() {
             <Select required onValueChange={v => set("reason_for_course", v)}>
               <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
               <SelectContent>{reasonOptions.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label>Affiliate</Label>
+            <Select onValueChange={v => set("affiliate", v === "None" ? "" : v)}>
+              <SelectTrigger><SelectValue placeholder="Select affiliate (optional)" /></SelectTrigger>
+              <SelectContent>{affiliateOptions.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
             </Select>
           </div>
           <Button type="submit" className="w-full" disabled={loading}>

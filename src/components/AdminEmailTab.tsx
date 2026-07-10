@@ -15,6 +15,7 @@ interface Course {
 export default function AdminEmailTab({ courses }: { courses: Course[] }) {
   const [audience, setAudience] = useState<string>("all");
   const [selectedCourse, setSelectedCourse] = useState<string>("");
+  const [selectedAffiliate, setSelectedAffiliate] = useState<string>("Ukana");
   const [individualEmail, setIndividualEmail] = useState("");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
@@ -23,7 +24,7 @@ export default function AdminEmailTab({ courses }: { courses: Course[] }) {
 
   useEffect(() => {
     loadRecipientCount();
-  }, [audience, selectedCourse]);
+  }, [audience, selectedCourse, selectedAffiliate, individualEmail]);
 
   const loadRecipientCount = async () => {
     if (audience === "individual") {
@@ -40,6 +41,12 @@ export default function AdminEmailTab({ courses }: { courses: Course[] }) {
         .select("user_id")
         .eq("course_id", selectedCourse);
       setRecipientCount(enrollments?.length || 0);
+    } else if (audience === "affiliate" && selectedAffiliate) {
+      const { count } = await supabase
+        .from("profiles")
+        .select("*", { count: "exact", head: true })
+        .eq("affiliate", selectedAffiliate);
+      setRecipientCount(count || 0);
     } else {
       setRecipientCount(0);
     }
@@ -63,6 +70,14 @@ export default function AdminEmailTab({ courses }: { courses: Course[] }) {
         .select("user_id")
         .eq("course_id", selectedCourse);
       userIds = (enrollments || []).map(e => e.user_id);
+    }
+
+    if (audience === "affiliate" && selectedAffiliate) {
+      const { data } = await supabase
+        .from("profiles")
+        .select("email")
+        .eq("affiliate", selectedAffiliate);
+      return (data || []).map(p => p.email);
     }
 
     if (userIds.length === 0) return [];
@@ -147,6 +162,9 @@ export default function AdminEmailTab({ courses }: { courses: Course[] }) {
             <SelectItem value="course">
               <span className="flex items-center gap-2"><Mail className="h-4 w-4" /> Course enrollees</span>
             </SelectItem>
+            <SelectItem value="affiliate">
+              <span className="flex items-center gap-2"><Users className="h-4 w-4" /> Affiliate group</span>
+            </SelectItem>
             <SelectItem value="individual">
               <span className="flex items-center gap-2"><User className="h-4 w-4" /> Individual</span>
             </SelectItem>
@@ -162,6 +180,17 @@ export default function AdminEmailTab({ courses }: { courses: Course[] }) {
               {courses.map(c => (
                 <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
               ))}
+            </SelectContent>
+          </Select>
+        )}
+
+        {audience === "affiliate" && (
+          <Select value={selectedAffiliate} onValueChange={setSelectedAffiliate}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select affiliate" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Ukana">Ukana</SelectItem>
             </SelectContent>
           </Select>
         )}
